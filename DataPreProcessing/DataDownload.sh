@@ -1,6 +1,6 @@
-# Shell script used for downloading data.
-
 #!/usr/bin/env bash
+
+# Shell script used for downloading data.
 
 # Function to complete a local filepath
 get_abs_filename() {
@@ -9,7 +9,6 @@ get_abs_filename() {
 
 # Position rest of commands into DataPreProcessing directory
 cd "$(dirname "$0")"
-echo $PWD
 
 # Target download directory for data
 targetDataDir=$(get_abs_filename "Data/")
@@ -21,4 +20,15 @@ fi
 # Download ENCODE DNase tracks to the target "Data/" directory
 wget -r ftp://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeAwgDnaseUniform -P $targetDataDir
 
-echo "ENCODE data downloaded"
+# Rearrange data from ENCODE
+mv Data/hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeAwgDnaseUniform/ Data/ENCODE/
+rm -r Data/hgdownload.cse.ucsc.edu
+
+# Download RoadmapGenomics DNase information to the target "Data/" directory
+wget -r -A "*DNase.hotspot.fdr0.01.peaks.bed.gz" http://egg2.wustl.edu/roadmap/data/byFileType/peaks/consolidated/narrowPeak -P Data/
+
+# Rearrange data from RoadmapGenomics
+mv Data/egg2.wustl.edu/roadmap/data/byFileType/peaks/consolidated/narrowPeak/ Data/RoadmapGenomics
+rm -r Data/RoadmapGenomics/hammock/
+rm -r Data/RoadmapGenomics/ucsc_compatible/
+rm -r Data/egg2.wustl.edu
