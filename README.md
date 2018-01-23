@@ -6,9 +6,9 @@ cd DataPreProcessing
    - Download ENCODE data.
    - Download Roadmap Genomics Data.
    - Download or sym link the hg19 reference genome.
-   - ```bash
-   bash DataDownload.sh
-   ```
+```bash
+bash DataDownload.sh
+```
 2. Run make to prepare bed files.
 ```bash
 make

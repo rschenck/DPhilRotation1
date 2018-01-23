@@ -17,6 +17,9 @@ if ! [ -d "$targetDataDir" ]; then
     mkdir $targetDataDir
 fi
 
+# Create directory for the Genome
+mkdir Data/Genome
+
 # Download ENCODE DNase tracks to the target "Data/" directory
 wget -r ftp://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeAwgDnaseUniform -P $targetDataDir
 
