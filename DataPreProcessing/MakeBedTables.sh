@@ -10,11 +10,8 @@ get_abs_filename() {
 # Position rest of commands into DataPreProcessing directory
 cd "$(dirname "$0")"
 
-# Target download directory for data
-targetDataDir=$(get_abs_filename "Data/")
-
 python Make_bed_files.py
 
-cat Data/ENCODE_beds.txt Data/ROADMAP_beds.txt > data_beds.txt
+cat Data/ENCODE_beds.txt Data/ROADMAP_beds.txt > Data/data_beds.txt
 rm Data/ENCODE_beds.txt
 rm Data/ROADMAP_beds.txt

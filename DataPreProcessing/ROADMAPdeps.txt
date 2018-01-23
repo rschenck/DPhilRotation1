@@ -37,3 +37,4 @@ Data/RoadmapGenomics/E097-DNase.hotspot.fdr0.01.peaks.bed.gz
 Data/RoadmapGenomics/E098-DNase.hotspot.fdr0.01.peaks.bed.gz
 Data/RoadmapGenomics/E100-DNase.hotspot.fdr0.01.peaks.bed.gz
 Data/RoadmapGenomics/E109-DNase.hotspot.fdr0.01.peaks.bed.gz
+Data/RoadmapGenomics/jul2013.roadmapData.qc.xlsx

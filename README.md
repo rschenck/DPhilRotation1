@@ -1,5 +1,3 @@
-# DPhilRotation1
-
 **Step 1: DataPreProcessing**:
 ```bash
 cd DataPreProcessing
@@ -8,7 +6,7 @@ cd DataPreProcessing
    - Download ENCODE data.
    - Download Roadmap Genomics Data.
    - Create bed tables from ENCODE and Roadmap Genomics Data
-   - Compile bed tabels into a single bed table
+   - Compile bed tables into a single bed table
 2. The final output of the Makefile will be a usable bed file of all data needed.
 ```bash
 make
