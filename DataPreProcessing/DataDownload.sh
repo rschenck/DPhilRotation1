@@ -32,3 +32,5 @@ mv Data/egg2.wustl.edu/roadmap/data/byFileType/peaks/consolidated/narrowPeak/ Da
 rm -r Data/RoadmapGenomics/hammock/
 rm -r Data/RoadmapGenomics/ucsc_compatible/
 rm -r Data/egg2.wustl.edu
+
+# Completed for data download
