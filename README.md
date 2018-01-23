@@ -1,4 +1,15 @@
-**Step 1: DataPreProcessing**:
+**Step 1: Checking the Environment
+```bash
+bash ConfEnv.sh
+```
+1. This script does the following:
+   - Checks if data downloading is possible with wget.
+   - Ensures bedtools is installed and executable.
+   - Checks if ENCODE and Roadmap Epigenomics data is downloaded already.
+     -Downloads data if necessary
+   - Makes sure that a reference hg19.fa file is present.
+
+**Step 2: DataPreProcessing**:
 ```bash
 cd DataPreProcessing
 ```

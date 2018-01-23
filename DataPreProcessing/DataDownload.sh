@@ -38,5 +38,3 @@ rm -r Data/egg2.wustl.edu
 
 # Download Corresponding table for Roadmap Epigenomics Data
 wget --output-document=Data/RoadmapGenomics/jul2013.roadmapData.qc.xlsx "https://docs.google.com/a/mail.usf.edu/spreadsheets/d/1yikGx4MsO9Ei36b64yOy9Vb6oPC5IBGlFbYEt-N6gOM/export?format=xlsx&id=1yikGx4MsO9Ei36b64yOy9Vb6oPC5IBGlFbYEt-N6gOM"
-
-# Completed for data download
