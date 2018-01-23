@@ -2,12 +2,14 @@
 ```bash
 cd DataPreProcessing
 ```
-1. Run Makefile to do the following...
+1. Run DataDownload to do the following...
    - Download ENCODE data.
    - Download Roadmap Genomics Data.
-   - Create bed tables from ENCODE and Roadmap Genomics Data
-   - Compile bed tables into a single bed table
-2. The final output of the Makefile will be a usable bed file of all data needed.
+   - Download or sym link the hg19 reference genome.
+   - '''bash
+   bash DataDownload.sh
+   '''
+2. Run make to prepare bed files.
 ```bash
 make
 # If the make fails run the following:
