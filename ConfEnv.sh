@@ -137,7 +137,7 @@ else
     echo "ENCODE and Roadmap Epigenomics Data found..."
 fi
 
-if [ -e "./DataPreProcessing/Data/Genome/hg19.fa" ]; then
+if [ -e "./DataPreProcessing/Data/Genome/hg19.fa" ] && [ -e "./DataPreProcessing/Data/Genome/hg19.fa.fai" ]; then
     echo "Reference Genome found..."
 else
     echo -ne "Do you want to sym-link an existing copy of hg19.fa (0) or download it (1)? "
@@ -172,10 +172,12 @@ else
         ln -s $REFCHOICE ./DataPreProcessing/Data/Genome/
 
         if [ -e "$REFCHOICE.fai" ]; then
-            echo "Indexed hg19 found..."
+            ln -s "$REFCHOICE.fai" ./DataPreProcessing/Data/Genome/
+            echo "Indexed hg19 found and sym-linked..."
         else
             echo "Index of hg19 Not Found..."
 #            samtools faidx $REFCHOICE
+            exit 1
         fi
 
     elif [ $USRCHOICE -eq $TRUE ]; then
