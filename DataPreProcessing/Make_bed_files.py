@@ -40,7 +40,7 @@ def ENCODE_bed():
             beds_out.write('%s\t%s\n' % (cell, bedfile))
 
 def Roadmap_bed():
-    df = pd.read_excel('Data/RoadmapGenomics/jul2013.roadmapData.qc.xlsx', sheetname='Consolidated_EpigenomeIDs_summa')
+    df = pd.read_excel('Data/RoadmapGenomics/jul2013.roadmapData.qc.xlsx', sheet_name='Consolidated_EpigenomeIDs_summa')
 
     with open('Data/ROADMAP_beds.txt', 'w') as beds_out:
         for i in range(df.shape[0]):

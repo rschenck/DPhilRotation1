@@ -8,10 +8,13 @@ bash ConfEnv.sh
    - Checks if ENCODE and Roadmap Epigenomics data is downloaded already.
      - Downloads data if necessary.
    - Makes sure that a reference hg19.fa file is present or downloads it.
-
-
-
-
+```bash
+bash ./DataPreProcessing/MakeBedTables.sh
+```
+**Step 2: Prepare Data
+1. This script does the following:
+   - Process bed files from ENCODE and Roadmap Epigenomics
+   - Organize DNase Seq data
 
 
 **BELOW THIS AND UNDER DEVELOPMENT**
