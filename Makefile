@@ -1,5 +1,5 @@
 # Executes automatically
-.PHONY : .PHONY
+.PHONY : clean
 	echo "Complete"
 
 clean :
