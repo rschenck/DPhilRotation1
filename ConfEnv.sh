@@ -132,7 +132,7 @@ fi
 
 if [ $ROADMAP -eq $FALSE ] || [ $ENCODE -eq $FALSE ]; then
     echo "Proper data not found. Will commence download..."
-    bash ./DataPreProcessing/Data/DataDownload.sh
+    bash ./DataPreProcessing/DataDownload.sh
 else
     echo "ENCODE and Roadmap Epigenomics Data found..."
 fi
@@ -144,6 +144,7 @@ else
     read USRCHOICE
 
     if [ $USRCHOICE -eq $FALSE ]; then
+        echo "Searching for local copies of hg19.fa..."
         my_array=()
         while IFS= read -r line; do
             my_array+=( "$line" )
