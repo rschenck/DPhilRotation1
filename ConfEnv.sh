@@ -171,6 +171,13 @@ else
 
         ln -s $REFCHOICE ./DataPreProcessing/Data/Genome/
 
+        if [ -e "$REFCHOICE.fai" ]; then
+            echo "Indexed hg19 found..."
+        else
+            echo "Index of hg19 Not Found..."
+#            samtools faidx $REFCHOICE
+        fi
+
     elif [ $USRCHOICE -eq $TRUE ]; then
         echo "Downloading hg19 genome..."
         wget ftp://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/chromFa.tar.gz -O chromFa.tar.gz -P ./DataPreProcessing/Data/Genome/
@@ -179,6 +186,7 @@ else
         rm ./DataPreProcessing/Data/Genome/chromFa.tar.gz
         rm ./DataPreProcessing/Data/Genome/chr*.fa
         echo "Reference hg19 genome downloaded..."
+        samtools faidx ./DataPreProcessing/Data/Genome/hg19.fa
     else
         echo "User exit."
         exit 1
