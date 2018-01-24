@@ -137,6 +137,13 @@ else
     echo "ENCODE and Roadmap Epigenomics Data found..."
 fi
 
+if [ -e "./DataPreProcessing/Data/Genome/hg19.chrom.sizes" ]; then
+    echo "Chromosome lengths found"
+else
+    echo "Obtaining chromosome lengths"
+    wget https://genome.ucsc.edu/goldenpath/help/hg19.chrom.sizes -P ./DataPreProcessing/Data/Genome/
+fi
+
 if [ -e "./DataPreProcessing/Data/Genome/hg19.fa" ] && [ -e "./DataPreProcessing/Data/Genome/hg19.fa.fai" ]; then
     echo "Reference Genome found..."
 else
@@ -176,6 +183,7 @@ else
             echo "Indexed hg19 found and sym-linked..."
         else
             echo "Index of hg19 Not Found..."
+            echo "Indexing hg19..."
             samtools faidx $REFCHOICE
             ln -s "$REFCHOICE.fai" ./DataPreProcessing/Data/Genome/
         fi
