@@ -9,7 +9,7 @@ get_abs_filename() {
 
 # Position rest of commands into DataPreProcessing directory
 cd "$(dirname "$0")"
-
+echo $PWD
 
 # Check ENCODE data
 FILES=0
