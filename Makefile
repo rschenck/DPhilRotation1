@@ -1,5 +1,5 @@
 # Executes automatically
-ConfEnv.sh : ConfEnv.sh
+ConfEnv.sh :
 	echo "Complete"
 
 clean :
