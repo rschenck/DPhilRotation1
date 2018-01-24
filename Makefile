@@ -1,6 +1,6 @@
 # Executes automatically
-.PHONY : clean
+ConfEnv.sh : ConfEnv.sh
 	echo "Complete"
 
-clean : .PHONY
+clean :
 	rm -rf ./DataPreProcessing/Data/*
