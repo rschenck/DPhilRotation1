@@ -10,13 +10,6 @@ get_abs_filename() {
 # Position rest of commands into DataPreProcessing directory
 cd "$(dirname "$0")"
 
-# Target download directory for data
-targetDataDir=$(get_abs_filename "Data/")
-
-if ! [ -d "$targetDataDir" ]; then
-    mkdir $targetDataDir
-fi
-
 # Create directory for the Genome
 mkdir Data/Genome
 

@@ -4,11 +4,17 @@ bash ConfEnv.sh
 ```
 1. This script does the following:
    - Checks if data downloading is possible with wget.
-   - Ensures bedtools is installed and executable.
+   - Ensures bedtools and samtools is installed and executable.
    - Checks if ENCODE and Roadmap Epigenomics data is downloaded already.
      - Downloads data if necessary.
-   - Makes sure that a reference hg19.fa file is present.
+   - Makes sure that a reference hg19.fa file is present or downloads it.
 
+
+
+
+
+
+**BELOW THIS AND UNDER DEVELOPMENT**
 **Step 2: DataPreProcessing**:
 ```bash
 cd DataPreProcessing

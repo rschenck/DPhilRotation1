@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+get_abs_filename() {
+  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+}
+
 TRUE=1
 FALSE=0
 
@@ -45,12 +49,52 @@ else
 
     cp ~/.bash_profile ~/.bash_profile.bak
 
-    echo "# Added from Rotation 1 project" >>~/.bash_profile
+    echo "# Added from Rotation 1 project bedtools" >>~/.bash_profile
+    echo 'export PATH="'$APPENDER':$PATH"' >>~/.bash_profile
+    echo "Please run 'source ~/.bash_profile' or close and reopen a new terminal before proceeding."
+fi
+
+# Checks if samtools is present...
+if hash samtools 2>/dev/null; then
+    echo "samtools found..."
+else
+    my_array=()
+    while IFS= read -r line; do
+        my_array+=( "$line" )
+    done < <( locate samtools | grep "bin/samtools" | grep -v ".pl" )
+
+    my_array_length=${#my_array[@]}
+    a=0
+
+    if [ "$my_array_length" -gt "$a" ]; then
+        for i in "${!my_array[@]}"; do
+          printf "%s\t%s\n" "$i" "${my_array[$i]}"
+        done
+    else
+        echo "No samtools installations found..."
+        exit 1
+    fi
+
+    echo -ne "Choose program to append to ~/.bash_profile: "
+
+    read bedChoice
+
+    usrchoice=${my_array[$bedChoice]}
+    APPENDER=$(dirname $usrchoice)
+
+    echo "Appending $APPENDER to ~/.bash_profile..."
+
+    cp ~/.bash_profile ~/.bash_profile.bak
+
+    echo "# Added from Rotation 1 project samtools" >>~/.bash_profile
     echo 'export PATH="'$APPENDER':$PATH"' >>~/.bash_profile
     echo "Please run 'source ~/.bash_profile' or close and reopen a new terminal before proceeding."
 fi
 
 echo "Checking sub-directory structure and data downloads..."
+
+mkdir ./DataPreProcessing/Data
+mkdir ./DataPreProcessing/Data/Genome
 
 # Check ENCODE data
 FILES=0
@@ -86,8 +130,57 @@ fi
 
 if [ $ROADMAP -eq $FALSE ] || [ $ENCODE -eq $FALSE ]; then
     echo "Proper data not found. Will commence download..."
+    bash ./DataPreProcessing/Data/DataDownload.sh
 else
     echo "ENCODE and Roadmap Epigenomics Data found..."
 fi
 
-echo "All requirements satisfied."
+if [ -e "./DataPreProcessing/Data/Genome/hg19.fa" ]; then
+    echo "Reference Genome found..."
+else
+    echo -ne "Do you want to sym-link an existing copy of hg19.fa (0) or download it (1)? "
+    read USRCHOICE
+
+    if [ $USRCHOICE -eq $FALSE ]; then
+        my_array=()
+        while IFS= read -r line; do
+            my_array+=( "$line" )
+        done < <( find ~/ -type f -name "hg19.fa" )
+
+        my_array_length=${#my_array[@]}
+        a=0
+
+        if [ "$my_array_length" -gt "$a" ]; then
+            echo "Searching for reference genome..."
+            for i in "${!my_array[@]}"; do
+              printf "%s\t%s\n" "$i" "${my_array[$i]}"
+            done
+        else
+            echo "No hg19.fa found please re-run ConfEnv.sh after downloading or choose to download hg19.fa..."
+            exit 1
+        fi
+
+        echo -ne "Choose the hg19.fa you want to sym-link: "
+
+        read REFCHOICE
+
+        REFCHOICE=${my_array[$REFCHOICE]}
+
+        ln -s $REFCHOICE ./DataPreProcessing/Data/Genome/
+
+    elif [ $USRCHOICE -eq $TRUE ]; then
+        echo "Downloading hg19 genome..."
+        wget ftp://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/chromFa.tar.gz -O chromFa.tar.gz -P ./DataPreProcessing/Data/Genome/
+        tar -xzvf ./DataPreProcessing/Data/Genome/chromFa.tar.gz
+        cat ./DataPreProcessing/Data/Genome/chr?.fa ./DataPreProcessing/Data/Genome/chr??.fa > ./DataPreProcessing/Data/Genome/hg19.fa
+        rm ./DataPreProcessing/Data/Genome/chromFa.tar.gz
+        rm ./DataPreProcessing/Data/Genome/chr*.fa
+        echo "Reference hg19 genome downloaded..."
+    else
+        echo "User exit."
+        exit 1
+    fi
+
+fi
+
+echo "Configuration and requirements satisfied."
