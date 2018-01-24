@@ -2,5 +2,5 @@
 .PHONY : clean
 	echo "Complete"
 
-clean :
+clean : .PHONY
 	rm -rf ./DataPreProcessing/Data/*
