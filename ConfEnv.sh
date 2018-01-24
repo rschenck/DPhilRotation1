@@ -176,8 +176,8 @@ else
             echo "Indexed hg19 found and sym-linked..."
         else
             echo "Index of hg19 Not Found..."
-#            samtools faidx $REFCHOICE
-            exit 1
+            samtools faidx $REFCHOICE
+            ln -s "$REFCHOICE.fai" ./DataPreProcessing/Data/Genome/
         fi
 
     elif [ $USRCHOICE -eq $TRUE ]; then
