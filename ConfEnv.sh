@@ -21,6 +21,7 @@ fi
 if hash bedtools 2>/dev/null; then
     echo "bedtools found..."
 else
+    echo "Searching for bedtools..."
     my_array=()
     while IFS= read -r line; do
         my_array+=( "$line" )
@@ -58,6 +59,7 @@ fi
 if hash samtools 2>/dev/null; then
     echo "samtools found..."
 else
+    echo "Searching for samtoools..."
     my_array=()
     while IFS= read -r line; do
         my_array+=( "$line" )
