@@ -19,7 +19,7 @@ while read p; do
   if [ -e "$p" ]; then
     ((PRESENT++))
   fi
-done <./DataPreProcessing/ENCODEdeps.txt
+done <./ENCODEdeps.txt
 
 if [ $FILES -eq $PRESENT ]; then
     ENCODE=1
@@ -41,7 +41,7 @@ while read p; do
   if [ -e "$p" ]; then
     ((PRESENT++))
   fi
-done <./DataPreProcessing/ROADMAPdeps.txt
+done <./ROADMAPdeps.txt
 
 if [ $FILES -eq $PRESENT ]; then
     ROADMAP=1
