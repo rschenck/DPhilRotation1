@@ -4,11 +4,12 @@ import os
 import gzip
 import re
 import subprocess
-import time
-from functools import wraps
+
 from optparse import OptionParser
 import h5py
 import numpy as np
+
+from Utils.Utils import *
 
 def find_midpoint(start, end):
     # Find the midpoint coordinate between start and end
@@ -102,7 +103,7 @@ def OptionParsing():
     parser.add_option('-y', dest='ignore_y', default=False, action='store_true', help='Ignore Y chromsosome features [Default: %default]')
     (options, args) = parser.parse_args()
     if not options.target_beds_file:  # if target_beds_file is not given
-        parser.error('Must provide file labeling the targets and providing BED file paths.')
+        parser.error('ERROR: Must provide file labeling the targets and providing BED file paths.')
     return(options, parser)
 
 def OptionChecker(Options, Parser):
@@ -134,24 +135,6 @@ def OptionChecker(Options, Parser):
         db_targets.append(a[0])
         target_beds.append(a[1])
     return(db_targets, target_beds, target_dbi, db_add)
-
-def UpdateProgress(i, n, DisplayText):
-    sys.stdout.write('\r')
-    j = (i + 1) / n
-    sys.stdout.write("[%-20s] %d%%\t INFO: %s" % ('=' * int(20 * j), 100 * j, DisplayText))
-    sys.stdout.flush()
-
-def fn_timer(function):
-    @wraps(function)
-    def function_timer(*args, **kwargs):
-        t0 = time.time()
-        result = function(*args, **kwargs)
-        t1 = time.time()
-        print ("INFO: Total time running %s: %s minutes" %
-               (function.__name__, str(round((t1-t0)/60.,2)))
-               )
-        return result
-    return function_timer
 
 def activity_set(act_cs):
     ''' Return a set of ints from a comma-separated list of int strings.
