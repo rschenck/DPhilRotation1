@@ -1,3 +1,11 @@
+**Dependencies**
+1. Python >= 3.6
+   - numpy
+   - h5py
+   - pandas
+   - xlrd
+2. Further dependencies will be checked in Step 1.
+
 **Step 1: Checking the Environment**
 ```bash
 bash ConfEnv.sh
@@ -24,7 +32,7 @@ bash ./DataPreProcessing/MakeBedTables.sh
 
 **Step 3: Prepare Data**
 ```bash
-# View what the different commands for this file are
+# View the different options for this code
 python ./DataPreProcessing/PreProcessBedFileFeatures.py --help
 
 # Sample of how to execute the code

@@ -137,10 +137,10 @@ def OptionChecker(Options, Parser):
         target_beds.append(a[1])
     return(db_targets, target_beds, target_dbi, db_add)
 
-def UpdateProgress(i, n):
+def UpdateProgress(i, n, DisplayText):
     sys.stdout.write('\r')
     j = (i + 1) / n
-    sys.stdout.write("[%-20s] %d%%" % ('=' * int(20 * j), 100 * j))
+    sys.stdout.write("[%-20s] %d%%\t INFO: %s" % ('=' * int(20 * j), 100 * j, DisplayText))
     sys.stdout.flush()
 
 def activity_set(act_cs):
@@ -263,7 +263,7 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
         else:
             peak_bed_in = open(peak_beds[bi], 'r')
 
-        UpdateProgress(i, n)
+        UpdateProgress(i, n, peak_beds[bi])
         i+=1
 
         for line in peak_bed_in:
@@ -350,16 +350,19 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
         subprocess.call(sort_cmd, shell=True)
         os.remove(chrom_files[chrom_key])
         chrom_files[chrom_key] = chrom_sbed
-        UpdateProgress(i, n)
+        UpdateProgress(i, n, chrom_key[0])
         i+=1
     sys.stdout.write('\n')
 
     return (chrom_files)
 
 def MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath):
+    print("Constructing peak data and creating Final Bed File...", file=sys.stdout)
     final_bed = "%s.bed"%(FilePath+"/Data/" + Options.out_prefix)
     final_bed_out = open(final_bed, 'w')
 
+    n=len(chrom_files)
+    i=0
     for chrom_key in chrom_files:
         chrom, strand = chrom_key
 
@@ -372,12 +375,8 @@ def MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath):
             peak_start = int(a[1])
             peak_end = int(a[2])
             peak_act = activity_set(a[6])
-            print(peak_start)
-            print(peak_end)
-            print(peak_act)
             peak = Peak(peak_start, peak_end, peak_act) # creates peak class
 
-            sys.exit()
             peak.extend(Options.feature_size, chrom_lengths.get(chrom, None))
 
             if len(open_peaks) == 0:
@@ -396,7 +395,7 @@ def MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath):
 
                     # print to file
                     for mpeak in mpeaks:
-                        print >> final_bed_out, mpeak.bed_str(chrom, strand)
+                        print(mpeak.bed_str(chrom, strand), file=final_bed_out)
 
                     # initialize open peak
                     open_end = peak.end
@@ -414,8 +413,9 @@ def MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath):
 
             # print to file
             for mpeak in mpeaks:
-                print >> final_bed_out, mpeak.bed_str(chrom, strand)
+                print(mpeak.bed_str(chrom, strand), file=final_bed_out)
 
+        UpdateProgress(i, n, chrom_key[0])
     final_bed_out.close()
 
     # clean
@@ -437,7 +437,7 @@ def main():
     chrom_files = GetPeaks(Options, target_beds, db_add, target_dbi, FilePath)
 
     '''Works up to this point!!!!!!!!!!!!'''
-
+    sys.exit()
     MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath)
 
 if __name__=="__main__":
