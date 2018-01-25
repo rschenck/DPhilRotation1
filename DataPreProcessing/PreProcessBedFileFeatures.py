@@ -168,6 +168,7 @@ def GetPeaks(Options, target_beds, db_add, target_dbi):
 def main():
     # Setup Primary Variables
     FilePath = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(FilePath)
     (Options, Parser) = OptionParsing()
     CHROMSIZES = os.path.abspath("%s/Data/Genome/hg19.chrom.sizes" % (FilePath))
     REFGENOME = os.path.abspath("%s/DataPreProcessing/Data/Genome/hg19.fa" % (FilePath))
