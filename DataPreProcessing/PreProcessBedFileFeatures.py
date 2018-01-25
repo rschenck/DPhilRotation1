@@ -114,7 +114,8 @@ def GetPeaks(Options, target_beds, db_add, target_dbi):
 
             # open chromosome file
             if chrom_key not in chrom_outs:
-                chrom_files[chrom_key] = '%s_%s_%s.bed' % ("./Data/tmp/" + Options.out_prefix, chrom, strand)
+                chrom_file_path = os.path.abspath("Data/tmp/")+"/"+Options.out_prefix
+                chrom_files[chrom_key] = '%s_%s_%s.bed' % (chrom_file_path, chrom, strand)
                 chrom_outs[chrom_key] = open(chrom_files[chrom_key], 'w')
 
             # if it's the db bed
