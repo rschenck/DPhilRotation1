@@ -128,14 +128,13 @@ def GetPeaks(Options, target_beds, db_add, target_dbi):
                 a[6] = str(target_dbi[bi])
                 print('\t'.join(a[:7]), file=chrom_outs[chrom_key])
 
-            sys.stdout.write('\r')
+            print('\r')
             # the exact output you're looking for:
             j = (i + 1) / n
-            print(str(j),file=sys.stdout)
-            sys.stdout.write("[%-20s] %d%%" % ('=' * int(20 * j), 100 * j))
+            print("[%-20s] %d%%" % ('=' * int(20 * j), 100 * j))
             sys.stdout.flush()
 
-        print('\n', file=sys.stdout)
+        # print('\n', file=sys.stdout)
         peak_bed_in.close()
 
     # close chromosome-specific files
