@@ -97,6 +97,8 @@ echo "Checking sub-directory structure and data downloads..."
 
 mkdir ./DataPreProcessing/Data
 mkdir ./DataPreProcessing/Data/Genome
+mkdir ./DataPreProcessing/Data/ModelData
+mkdir ./DataPreProcessing/Data/tmp
 
 # Check ENCODE data
 FILES=0
