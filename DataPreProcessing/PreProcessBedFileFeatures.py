@@ -86,10 +86,11 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
         else:
             peak_bed_in = open(peak_beds[bi], 'r')
 
-        print('\r', file=sys.stdout)
+        sys.stdout.write('\r')
         # the exact output you're looking for:
         j = (i + 1) / n
-        print("[%-20s] %d%%" % ('=' * int(20 * j), 100 * j), file=sys.stdout)
+        sys.stdout.write("[%-20s] %d%%" % ('=' * int(20 * j), 100 * j))
+        sys.stdout.flush()
         i+=1
 
         for line in peak_bed_in:
@@ -137,7 +138,8 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
                 print('\t'.join(a[:7]), file=chrom_outs[chrom_key])
 
         peak_bed_in.close()
-        sys.stdout.flush()
+
+    sys.stdout.write('\n')
 
     # close chromosome-specific files
     for chrom_key in chrom_outs:
@@ -162,6 +164,14 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
                 print('Ignoring %s %s' % (chrom, strand), file=sys.stdout)
                 os.remove(chrom_files[chrom_key])
                 del chrom_files[chrom_key]
+
+    for chrom_key in chrom_files:
+        chrom, strand = chrom_key
+        chrom_sbed = '%s_%s_%s_sort.bed' % (Options.out_prefix, chrom, strand)
+        sort_cmd = 'sortBed -i %s > %s' % (chrom_files[chrom_key], chrom_sbed)
+        subprocess.call(sort_cmd, shell=True)
+        os.remove(chrom_files[chrom_key])
+        chrom_files[chrom_key] = chrom_sbed
 
     return (chrom_files)
 
