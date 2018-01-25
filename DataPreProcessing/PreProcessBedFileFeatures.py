@@ -131,6 +131,7 @@ def GetPeaks(Options, target_beds, db_add, target_dbi):
             sys.stdout.write('\r')
             # the exact output you're looking for:
             j = (i + 1) / n
+            print(str(j),file=sys.stdout)
             sys.stdout.write("[%-20s] %d%%" % ('=' * int(20 * j), 100 * j))
             sys.stdout.flush()
 
