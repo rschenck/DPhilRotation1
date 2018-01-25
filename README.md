@@ -23,6 +23,13 @@ bash ./DataPreProcessing/MakeBedTables.sh
    - This file will then be used for Step 3
 
 **Step 3: Prepare Data**
+```bash
+# View what the different commands for this file are
+python ./DataPreProcessing/PreProcessBedFileFeatures.py --help
+
+# Sample of how to execute the code
+python ./DataPreProcessing/PreProcessBedFileFeatures.py -f DataPreProcessing/Data/data_beds.txt -y -m 200 -s 600 -o TestRun
+```
 1. This script does the following:
    - Process bed files from ENCODE and Roadmap Epigenomics
      - Extract information from each cell line DNase Seq bed file
@@ -30,23 +37,3 @@ bash ./DataPreProcessing/MakeBedTables.sh
      - Merge into a chromosome specific bed file
      - Sort the chromosome specific bed files.
      - ....? Something with peaks and merging... Needs updating
-
-
-**BELOW THIS AND UNDER DEVELOPMENT**
-**Step 2: DataPreProcessing**:
-```bash
-cd DataPreProcessing
-```
-1. Run DataDownload to do the following...
-   - Download ENCODE data.
-   - Download Roadmap Genomics Data.
-   - Download or sym link the hg19 reference genome.
-```bash
-bash DataDownload.sh
-```
-2. Run make to prepare bed files.
-```bash
-make
-# If the make fails run the following:
-make clean
-```
