@@ -218,11 +218,11 @@ class Peak:
         merge_mid = int(0.5+np.average(peak_mids, weights=peak_weights))
 
         # extend to the full size
-        merge_start = int(max(0, merge_mid - ext_len/2))
-        merge_end = int(merge_start + ext_len)
+        merge_start = max(0, merge_mid - ext_len/2)
+        merge_end = merge_start + ext_len
         if chrom_len and merge_end > chrom_len:
-            merge_end = int(chrom_len)
-            merge_start = int(merge_end - ext_len)
+            merge_end = chrom_len
+            merge_start = merge_end - ext_len
 
         # merge activities
         merge_act = self.act | peak2.act

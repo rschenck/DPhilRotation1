@@ -7,8 +7,8 @@ import numpy as np
 import numpy.random as npr
 import pandas as pd
 import h5py
+import Utils.dna_io
 from Utils.Utils import *
-
 
 def OptionParsing():
     usage = 'usage: %prog [options] -f <fasta_file> -t <targets_file> -o <out_file>'
@@ -24,7 +24,7 @@ def OptionParsing():
                       help='Extend all sequences to this length [Default: %default]')
     parser.add_option('-r', dest='permute', default=False, action='store_true',
                       help='Permute sequences [Default: %default]')
-    parser.add_option('-s', dest='random_seed', default=1, type='int', help='numpy.random seed [Default: %default]')
+    parser.add_option('-s', dest='random_seed', default=30, type='int', help='numpy.random seed [Default: %default]')
     parser.add_option('-t', dest='test_pct', default=0, type='float', help='Test % [Default: %default]')
     parser.add_option('-v', dest='valid_pct', default=0, type='float', help='Validation % [Default: %default]')
     parser.add_option('--vt', dest='valid_test', default=False, action='store_true',
@@ -32,10 +32,14 @@ def OptionParsing():
     (options, args) = parser.parse_args()
     if not options.fasta_file or not options.targets_file or not options.out_file:
         parser.error('ERROR: Must provide fasta file, targets file, and an output prefix')
+    return(options, parser)
 
 @fn_timer
 def main():
-    pass
+    # Setup Primary Variables
+    FilePath = os.path.dirname(os.path.abspath(__file__))
+    (Options, Parser) = OptionParsing()
+
 
 if __name__=="__main__":
     main()

@@ -1,11 +1,18 @@
-**Dependencies**
+## Getting Started
+
+Portions of this code have been adapted from [Basset](https://github.com/davek44/Basset).
+
+## Dependencies
+
 1. Python >= 3.6
    - numpy
    - h5py
    - pandas
    - xlrd
-   - dna_io
+   - sklearn
 2. Further dependencies will be checked in Step 1.
+
+## Using the code
 
 **Step 1: Checking the Environment**
 ```bash
@@ -39,7 +46,7 @@ python ./DataPreProcessing/PreProcessBedFileFeatures.py --help
 # Sample of how to execute the code
 python ./DataPreProcessing/PreProcessBedFileFeatures.py -f DataPreProcessing/Data/data_beds.txt -y -m 200 -s 600 -o TestRun
 ```
-###### This script may take approximately 46 minutes to run on ENCODE and Roadmap Epigenetics data.
+###### This script may take approximately 46 minutes to run on ENCODE and Roadmap Epigenomics data.
 1. This script does the following:
    - Process bed files from ENCODE and Roadmap Epigenomics
      - Extract information from each cell line DNase Seq bed file
