@@ -10,12 +10,8 @@ import numpy as np
 
 def find_midpoint(start, end):
     # Find the midpoint coordinate between start and end
-    if (start + end)%2!=0:
-        print("Chromosome non-integer start")
-        exit(1)
-    else:
-        mid = (start + end)/2
-    return int(mid)
+    mid = (start + end)/2
+    return(int(mid))
 
 def merge_peaks(peaks, peak_size, merge_overlap, chrom_len):
     ''' Merge and the list of Peaks.
@@ -116,7 +112,7 @@ def OptionChecker(Options, Parser):
         if not Options.no_db_activity:
             if Options.db_act_file is None:
                 Parser.error(
-                    'Must provide both activity table or specify -n if you want to add to an existing database')
+                    'ERROR: Must provide both activity table or specify -n if you want to add to an existing database')
             else:
                 # read db target names
                 db_act_in = open(Options.db_act_file)
@@ -247,7 +243,7 @@ def ReadChromSizes(CHROMSIZES):
     return(chrom_lengths)
 
 def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
-    print("Extracting peaks for chromosome specific files...", file=sys.stdout)
+    print("INFO: Extracting peaks for chromosome specific files...", file=sys.stdout)
     chrom_files = {}
     chrom_outs = {}
 
@@ -323,7 +319,7 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
         for orient in '+-':
             chrom_key = ('chrY', orient)
             if chrom_key in chrom_files:
-                print('Ignoring chrY %s' % orient, file=sys.stdout)
+                print('INFO: Ignoring chrY %s' % orient, file=sys.stdout)
                 os.remove(chrom_files[chrom_key])
                 del chrom_files[chrom_key]
 
@@ -334,12 +330,12 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
             chrom, strand = chrom_key
             primary_m = primary_re.match(chrom)
             if not primary_m and chrom != 'chrX':
-                print('Ignoring %s %s' % (chrom, strand), file=sys.stdout)
+                print('INFO: Ignoring %s %s' % (chrom, strand), file=sys.stdout)
                 os.remove(chrom_files[chrom_key])
                 del chrom_files[chrom_key]
 
     # sort the bed files
-    print("Sorting chromosome specific bed files...", file=sys.stdout)
+    print("INFO: Sorting chromosome specific bed files...", file=sys.stdout)
     n = len(chrom_files)
     i = 0
     for chrom_key in chrom_files:
@@ -357,13 +353,14 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
     return (chrom_files)
 
 def MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath):
-    print("Constructing peak data and creating Final Bed File...", file=sys.stdout)
+    print("INFO: Constructing peak data and creating Final Bed File...", file=sys.stdout)
     final_bed = "%s.bed"%(FilePath+"/Data/" + Options.out_prefix)
     final_bed_out = open(final_bed, 'w')
 
     n=len(chrom_files)
     i=0
     for chrom_key in chrom_files:
+        UpdateProgress(i, n, chrom_key[0])
         chrom, strand = chrom_key
 
         open_peaks = []
@@ -416,6 +413,7 @@ def MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath):
                 print(mpeak.bed_str(chrom, strand), file=final_bed_out)
 
         UpdateProgress(i, n, chrom_key[0])
+        i += 1
     final_bed_out.close()
 
     # clean
@@ -436,8 +434,7 @@ def main():
     # Extract Peak Information from BED files
     chrom_files = GetPeaks(Options, target_beds, db_add, target_dbi, FilePath)
 
-    '''Works up to this point!!!!!!!!!!!!'''
-    sys.exit()
+    # Merge Peaks, Extend, and close any open peaks
     MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath)
 
 if __name__=="__main__":
