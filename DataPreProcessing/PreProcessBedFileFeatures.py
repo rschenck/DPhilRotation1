@@ -11,8 +11,12 @@ import numpy as np
 # General Functions
 def find_midpoint(start, end):
     # Find the midpoint coordinate between start and end
-    mid = (start + end)/2
-    return mid
+    if (start + end)%2!=0:
+        print("Chromosome non-integer start")
+        exit(1)
+    else:
+        mid = (start + end)/2
+    return int(mid)
 
 # Parse user options
 def OptionParsing():
@@ -62,6 +66,12 @@ def OptionChecker(Options, Parser):
         target_beds.append(a[1])
     return(db_targets, target_beds, target_dbi, db_add)
 
+def UpdateProgress(i, n):
+    sys.stdout.write('\r')
+    j = (i + 1) / n
+    sys.stdout.write("[%-20s] %d%%" % ('=' * int(20 * j), 100 * j))
+    sys.stdout.flush()
+
 def ReadChromSizes(CHROMSIZES):
     chrom_lengths = {}
     for line in open(CHROMSIZES):
@@ -86,11 +96,7 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
         else:
             peak_bed_in = open(peak_beds[bi], 'r')
 
-        sys.stdout.write('\r')
-        # the exact output you're looking for:
-        j = (i + 1) / n
-        sys.stdout.write("[%-20s] %d%%" % ('=' * int(20 * j), 100 * j))
-        sys.stdout.flush()
+        UpdateProgress(i, n)
         i+=1
 
         for line in peak_bed_in:
@@ -110,8 +116,8 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
             start = int(a[1])
             end = int(a[2])
             mid = find_midpoint(start, end)
-            a[1] = str(mid)
-            a[2] = str(mid + 1)
+            a[1] = str(int(mid))
+            a[2] = str(int(mid + 1))
 
             # open chromosome file
             if chrom_key not in chrom_outs:
@@ -165,13 +171,21 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
                 os.remove(chrom_files[chrom_key])
                 del chrom_files[chrom_key]
 
+    # sort the bed files
+    print("Sorting chromosome specific bed files...", file=sys.stdout)
+    n = len(chrom_files)
+    i = 0
     for chrom_key in chrom_files:
         chrom, strand = chrom_key
-        chrom_sbed = '%s_%s_%s_sort.bed' % (Options.out_prefix, chrom, strand)
+        chrom_sbed_file_path = FilePath + "/Data/tmp/" + Options.out_prefix
+        chrom_sbed = '%s_%s_%s_sort.bed' % (chrom_sbed_file_path, chrom, strand)
         sort_cmd = 'sortBed -i %s > %s' % (chrom_files[chrom_key], chrom_sbed)
         subprocess.call(sort_cmd, shell=True)
         os.remove(chrom_files[chrom_key])
         chrom_files[chrom_key] = chrom_sbed
+        UpdateProgress(i, n)
+        i+=1
+    sys.stdout.write('\n')
 
     return (chrom_files)
 
