@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import sys
 from collections import OrderedDict
-
+import subprocess
+from Utils.Utils import *
 import numpy as np
 import numpy.random as npr
 from sklearn import preprocessing
@@ -26,6 +27,7 @@ from sklearn import preprocessing
 #  train_scores:  Matrix with score vector rows.
 ################################################################################
 def align_seqs_scores_1hot(seq_vecs, seq_scores, sort=True):
+    print("INFO: Aligning sequence scores...")
     if sort:
         seq_headers = sorted(seq_vecs.keys())
     else:
@@ -198,15 +200,27 @@ def fasta2dict(fasta_file):
 #  seq_scores:  Dict mapping FASTA headers to score vectors.
 ################################################################################
 def hash_scores(scores_file):
+    print("INFO: Mapping FASTA headers to score vectors...", file=sys.stdout)
+    cmd = "wc -l %s" % (scores_file)
+    pipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE).stdout
+    n = int(pipe.read().decode("utf-8").lstrip(" ").split(" ")[0])
+    i = 0
+
     seq_scores = {}
 
-    for line in open(scores_file):
-        a = line.split()
+    with open(scores_file, 'r') as scoresIn:
+        for line in scoresIn:
+            a = line.split()
 
-        try:
-            seq_scores[a[0]] = np.array([float(a[i]) for i in range(1,len(a))])
-        except:
-            print('Ignoring header line', file=sys.stderr)
+            try:
+                UpdateProgress(i, n, str(i) + "/" + str(n) + " Scores")
+                seq_scores[a[0]] = np.array([float(a[i]) for i in range(1,len(a))])
+            except:
+                pass
+                # print('Ignoring header line', file=sys.stdout)
+            i += 1
+
+    sys.stdout.write('\n')
 
     # consider converting the scores to integers
     int_scores = True
@@ -240,22 +254,33 @@ def hash_scores(scores_file):
 # Output
 #  seq_vecs:    Dict mapping FASTA headers to sequence representation vectors.
 ################################################################################
+@fn_timer
 def hash_sequences_1hot(fasta_file, extend_len=None):
+    print("INFO: Obtaining longest sequence...", file=sys.stdout)
+    cmd = "wc -l %s" % (fasta_file)
+    pipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE).stdout
+    n = int(pipe.read().decode("utf-8").lstrip(" ").split(" ")[0])
+    i = 0
+
     # determine longest sequence
     if extend_len is not None:
         seq_len = extend_len
     else:
         seq_len = 0
         seq = ''
-        for line in open(fasta_file):
-            if line[0] == '>':
-                if seq:
-                    seq_len = max(seq_len, len(seq))
+        with open(fasta_file, 'r') as fastaIn:
+            for line in fastaIn:
+                UpdateProgress(i,n,str(i)+"/"+str(n)+" Sequences")
+                i+=1
+                if line[0] == '>':
+                    if seq:
+                        seq_len = max(seq_len, len(seq))
 
-                header = line[1:].rstrip()
-                seq = ''
-            else:
-                seq += line.rstrip()
+                    header = line[1:].rstrip()
+                    seq = ''
+                else:
+                    seq += line.rstrip()
+        sys.stdout.write("\n")
 
         if seq:
             seq_len = max(seq_len, len(seq))
@@ -263,15 +288,21 @@ def hash_sequences_1hot(fasta_file, extend_len=None):
     # load and code sequences
     seq_vecs = OrderedDict()
     seq = ''
-    for line in open(fasta_file):
-        if line[0] == '>':
-            if seq:
-                seq_vecs[header] = dna_one_hot(seq, seq_len)
+    i=0
+    print("INFO: Loading in and coding sequences...")
+    with open(fasta_file, 'r') as fastaIn:
+        for line in fastaIn:
+            UpdateProgress(i, n, str(i) + "/" + str(n) + " Sequences")
+            i += 1
+            if line[0] == '>':
+                if seq:
+                    seq_vecs[header] = dna_one_hot(seq, seq_len)
 
-            header = line[1:].rstrip()
-            seq = ''
-        else:
-            seq += line.rstrip()
+                header = line[1:].rstrip()
+                seq = ''
+            else:
+                seq += line.rstrip()
+    sys.stdout.write("\n")
 
     if seq:
         seq_vecs[header] = dna_one_hot(seq, seq_len)
@@ -290,9 +321,10 @@ def hash_sequences_1hot(fasta_file, extend_len=None):
 #  train_seqs:    Matrix with sequence vector rows.
 #  train_scores:  Matrix with score vector rows.
 ################################################################################
+@fn_timer
 def load_data_1hot(fasta_file, scores_file, extend_len=None, mean_norm=True, whiten=False, permute=True, sort=False):
     # load sequences
-    seq_vecs = hash_sequences_1hot(fasta_file, extend_len)
+    seq_vecs = hash_sequences_1hot(fasta_file, extend_len) # Implemented Timer and Update functions
 
     # load scores
     seq_scores = hash_scores(scores_file)

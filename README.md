@@ -54,9 +54,8 @@ python ./DataPreProcessing/PreProcessBedFileFeatures.py -f DataPreProcessing/Dat
      - Merge into a chromosome specific bed file
      - Sort the chromosome specific bed files.
      - ....? Something with peaks and merging... Needs updating
-2. Create a fasta file from the newly created bed file
-```bash
-bedtools getfasta -fi ./DataPreProcessing/Data/Genome/hg19.fa -bed ./DataPreprocessing/Data/TestRun.bed -s -fo ./DataPreprocessing/Data/TestRun.fa
-```
-3. Create HDF5 files for use within the model and split for training, validation, and testing.
+     - ....? Add about building activity table... Needs updating
+     - Constructs a FASTA file using bedtools getfasta
+
+2. Create HDF5 files for use within the model and split for training, validation, and testing.
 

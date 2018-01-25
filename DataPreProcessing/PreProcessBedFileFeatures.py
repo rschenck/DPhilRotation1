@@ -419,13 +419,51 @@ def MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath):
     for chrom_key in chrom_files:
         os.remove(chrom_files[chrom_key])
 
+    return(final_bed)
+
+@fn_timer
+def ConstructActivityTable(Options, FilePath, final_bed, db_targets):
+    print("INFO: Constructing or appending activity table...", file=sys.stdout)
+    final_act_out_file = "%s_act.txt"%(FilePath+"/Data/" + Options.out_prefix)
+    final_act_out = open(final_act_out_file, 'w')
+
+    # print header
+    cols = [''] + db_targets
+    print('\t'.join(cols), file=final_act_out)
+
+    # print sequences
+    with open(final_bed, 'r') as final_bed_in:
+        n = len(list(final_bed_in))
+    i = 0
+    with open(final_bed, 'r') as final_bed_in:
+        for line in final_bed_in:
+            UpdateProgress(i, n, 'Building Activity Table')
+            i += 1
+
+            a = line.rstrip().split('\t')
+            # index peak
+            peak_id = '%s:%s-%s(%s)' % (a[0], a[1], a[2], a[5])
+
+            # construct full activity vector
+            peak_act = [0] * len(db_targets)
+            for ai in a[6].split(','):
+                if ai != '.':
+                    peak_act[int(ai)] = 1
+
+            # print line
+            cols = [peak_id] + peak_act
+            print('\t'.join([str(c) for c in cols]), file=final_act_out)
+    sys.stdout.write('\n')
+
+    final_act_out.close()
+
 @fn_timer
 def main():
     # Setup Primary Variables
     FilePath = os.path.dirname(os.path.abspath(__file__))
     (Options, Parser) = OptionParsing()
     CHROMSIZES = os.path.abspath("%s/Data/Genome/hg19.chrom.sizes" % (FilePath))
-    REFGENOME = os.path.abspath("%s/DataPreProcessing/Data/Genome/hg19.fa" % (FilePath))
+    REFGENOME = os.path.abspath("%s/Data/Genome/hg19.fa" % (FilePath))
 
     # Extract Information from Primary Variables
     chrom_lengths = ReadChromSizes(CHROMSIZES)
@@ -435,9 +473,16 @@ def main():
     chrom_files = GetPeaks(Options, target_beds, db_add, target_dbi, FilePath)
 
     # Merge Peaks, Extend, and close any open peaks
-    MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath)
+    final_bed = MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath)
 
-    "Complete"
+    # Create Activity Table
+    ConstructActivityTable(Options, FilePath, final_bed, db_targets)
+
+    # Create FASTA file using bedtools
+    print("INFO: Constructing FASTA file with bedtools getfasta")
+    cmd = "bedtools getfasta -fi %s -bed %s -s -fo %s" % (REFGENOME , FilePath+"/Data/"+Options.out_prefix+".bed" , FilePath+"/Data/"+Options.out_prefix+".fa")
+    subprocess.call(cmd, shell=True)
 
 if __name__=="__main__":
     main()
+    print("Complete", file=sys.stdout)
