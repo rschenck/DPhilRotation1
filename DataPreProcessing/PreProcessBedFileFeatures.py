@@ -69,7 +69,7 @@ def ReadChromSizes(CHROMSIZES):
         chrom_lengths[a[0]] = int(a[1])
     return(chrom_lengths)
 
-def GetPeaks(Options, target_beds, db_add, target_dbi):
+def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
     print("Extracting peaks for chromosome specific files...", file=sys.stdout)
     chrom_files = {}
     chrom_outs = {}
@@ -114,7 +114,7 @@ def GetPeaks(Options, target_beds, db_add, target_dbi):
 
             # open chromosome file
             if chrom_key not in chrom_outs:
-                chrom_file_path = os.path.abspath("Data/tmp/")+"/"+Options.out_prefix
+                chrom_file_path = FilePath + "/Data/tmp/" + Options.out_prefix
                 chrom_files[chrom_key] = '%s_%s_%s.bed' % (chrom_file_path, chrom, strand)
                 chrom_outs[chrom_key] = open(chrom_files[chrom_key], 'w')
 
@@ -168,7 +168,6 @@ def GetPeaks(Options, target_beds, db_add, target_dbi):
 def main():
     # Setup Primary Variables
     FilePath = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(FilePath)
     (Options, Parser) = OptionParsing()
     CHROMSIZES = os.path.abspath("%s/Data/Genome/hg19.chrom.sizes" % (FilePath))
     REFGENOME = os.path.abspath("%s/DataPreProcessing/Data/Genome/hg19.fa" % (FilePath))
@@ -178,7 +177,7 @@ def main():
     db_targets, target_beds, target_dbi, db_add = OptionChecker(Options, Parser)
 
     # Extract Peak Information from BED files
-    chrom_files = GetPeaks(Options, target_beds, db_add, target_dbi)
+    chrom_files = GetPeaks(Options, target_beds, db_add, target_dbi, FilePath)
 
 if __name__=="__main__":
     main()
