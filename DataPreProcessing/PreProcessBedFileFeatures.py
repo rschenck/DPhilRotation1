@@ -8,7 +8,6 @@ from optparse import OptionParser
 import h5py
 import numpy as np
 
-# General Functions
 def find_midpoint(start, end):
     # Find the midpoint coordinate between start and end
     if (start + end)%2!=0:
@@ -18,7 +17,79 @@ def find_midpoint(start, end):
         mid = (start + end)/2
     return int(mid)
 
-# Parse user options
+def merge_peaks(peaks, peak_size, merge_overlap, chrom_len):
+    ''' Merge and the list of Peaks.
+
+    Repeatedly find the closest adjacent peaks and consider
+    merging them together, until there are no more peaks
+    we want to merge.
+
+    Attributes:
+        peaks (list[Peak]) : list of Peaks
+        peak_size (int) : desired peak extension size
+        chrom_len (int) : chromsome length
+
+    Returns:
+        Peak representing the merger
+    '''
+    max_overlap = merge_overlap
+    while len(peaks) > 1 and max_overlap >= merge_overlap:
+        # find largest overlap
+        max_i = 0
+        max_overlap = peaks[0].end - peaks[1].start
+        for i in range(1,len(peaks)-1):
+            peaks_overlap = peaks[i].end - peaks[i+1].start
+            if peaks_overlap > max_overlap:
+                max_i = i
+                max_overlap = peaks_overlap
+
+        if max_overlap >= merge_overlap:
+            # merge peaks
+            peaks[max_i].merge(peaks[max_i+1], peak_size, chrom_len)
+
+            # remove merged peak
+            peaks = peaks[:max_i+1] + peaks[max_i+2:]
+
+    return peaks
+
+def merge_peaks_dist(peaks, peak_size, chrom_len):
+    ''' Merge and grow the Peaks in the given list.
+
+    Obsolete
+
+    Attributes:
+        peaks (list[Peak]) : list of Peaks
+        peak_size (int) : desired peak extension size
+        chrom_len (int) : chromsome length
+
+    Returns:
+        Peak representing the merger
+    '''
+    # determine peak midpoints
+    peak_mids = []
+    peak_weights = []
+    for p in peaks:
+        mid = (p.start + p.end - 1) / 2.0
+        peak_mids.append(mid)
+        peak_weights.append(1+len(p.act))
+
+    # take the mean
+    merge_mid = int(0.5+np.average(peak_mids, weights=peak_weights))
+
+    # extend to the full size
+    merge_start = max(0, merge_mid - peak_size/2)
+    merge_end = merge_start + peak_size
+    if chrom_len and merge_end > chrom_len:
+        merge_end = chrom_len
+        merge_start = merge_end - peak_size
+
+    # merge activities
+    merge_act = set()
+    for p in peaks:
+        merge_act |= p.act
+
+    return Peak(merge_start, merge_end, merge_act)
+
 def OptionParsing():
     usage = 'Usage %prog [options] <target_beds_file>'
     parser = OptionParser(usage)
@@ -71,6 +142,102 @@ def UpdateProgress(i, n):
     j = (i + 1) / n
     sys.stdout.write("[%-20s] %d%%" % ('=' * int(20 * j), 100 * j))
     sys.stdout.flush()
+
+def activity_set(act_cs):
+    ''' Return a set of ints from a comma-separated list of int strings.
+
+    Attributes:
+        act_cs (str) : comma-separated list of int strings
+
+    Returns:
+        set (int) : int's in the original string
+    '''
+    ai_strs = [ai for ai in act_cs.split(',')]
+
+    if ai_strs[-1] == '':
+        ai_strs = ai_strs[:-1]
+
+    if ai_strs[0] == '.':
+        aset = set()
+    else:
+        aset = set([int(ai) for ai in ai_strs])
+
+    return aset
+
+class Peak:
+    ''' Peak representation
+
+    Attributes:
+        start (int) : peak start
+        end   (int) : peak end
+        act   (set[int]) : set of target indexes where this peak is active.
+    '''
+    def __init__(self, start, end, act):
+        self.start = start
+        self.end = end
+        self.act = act
+
+    def extend(self, ext_len, chrom_len):
+        ''' Extend the peak to the given length
+
+        Args:
+            ext_len (int) : length to extend the peak to
+            chrom_len (int) : chromosome length to cap the peak at
+        '''
+        mid = find_midpoint(self.start, self.end)
+        self.start = max(0, mid - ext_len/2)
+        self.end = self.start + ext_len
+        if chrom_len and self.end > chrom_len:
+            self.end = chrom_len
+            self.start = self.end - ext_len
+
+    def bed_str(self, chrom, strand):
+        ''' Return a BED-style line
+
+        Args:
+            chrom (str)
+            strand (str)
+        '''
+        if len(self.act) == 0:
+            act_str = '.'
+        else:
+            act_str = ','.join([str(ai) for ai in sorted(list(self.act))])
+        cols = (chrom, str(self.start), str(self.end), '.', '1', strand, act_str)
+        return '\t'.join(cols)
+
+    def merge(self, peak2, ext_len, chrom_len):
+        ''' Merge the given peak2 into this peak
+
+        Args:
+            peak2 (Peak)
+            ext_len (int) : length to extend the merged peak to
+            chrom_len (int) : chromosome length to cap the peak at
+        '''
+        # find peak midpoints
+        peak_mids = [find_midpoint(self.start,self.end)]
+        peak_mids.append(find_midpoint(peak2.start,peak2.end))
+
+        # weight peaks
+        peak_weights = [1+len(self.act)]
+        peak_weights.append(1+len(peak2.act))
+
+        # compute a weighted average
+        merge_mid = int(0.5+np.average(peak_mids, weights=peak_weights))
+
+        # extend to the full size
+        merge_start = max(0, merge_mid - ext_len/2)
+        merge_end = merge_start + ext_len
+        if chrom_len and merge_end > chrom_len:
+            merge_end = chrom_len
+            merge_start = merge_end - ext_len
+
+        # merge activities
+        merge_act = self.act | peak2.act
+
+        # set merge to this peak
+        self.start = merge_start
+        self.end = merge_end
+        self.act = merge_act
 
 def ReadChromSizes(CHROMSIZES):
     chrom_lengths = {}
@@ -189,6 +356,72 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
 
     return (chrom_files)
 
+def MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath):
+    final_bed = "%s.bed"%(FilePath+"/Data/" + Options.out_prefix)
+    final_bed_out = open(final_bed, 'w')
+
+    for chrom_key in chrom_files:
+        chrom, strand = chrom_key
+
+        open_peaks = []
+        for line in open(chrom_files[chrom_key]):
+            a = line.split('\t')
+            a[-1] = a[-1].rstrip()
+
+            # construct Peak
+            peak_start = int(a[1])
+            peak_end = int(a[2])
+            peak_act = activity_set(a[6])
+            print(peak_start)
+            print(peak_end)
+            print(peak_act)
+            peak = Peak(peak_start, peak_end, peak_act) # creates peak class
+
+            sys.exit()
+            peak.extend(Options.feature_size, chrom_lengths.get(chrom, None))
+
+            if len(open_peaks) == 0:
+                # initialize open peak
+                open_end = peak.end
+                open_peaks = [peak]
+
+            else:
+                # operate on exiting open peak
+
+                # if beyond existing open peak
+                if open_end - Options.merge_overlap <= peak.start:
+                    # close open peak
+                    mpeaks = merge_peaks(open_peaks, Options.feature_size, Options.merge_overlap,
+                                         chrom_lengths.get(chrom, None))
+
+                    # print to file
+                    for mpeak in mpeaks:
+                        print >> final_bed_out, mpeak.bed_str(chrom, strand)
+
+                    # initialize open peak
+                    open_end = peak.end
+                    open_peaks = [peak]
+
+                else:
+                    # extend open peak
+                    open_peaks.append(peak)
+                    open_end = max(open_end, peak.end)
+
+        if len(open_peaks) > 0:
+            # close open peak
+            mpeaks = merge_peaks(open_peaks, Options.feature_size, Options.merge_overlap,
+                                 chrom_lengths.get(chrom, None))
+
+            # print to file
+            for mpeak in mpeaks:
+                print >> final_bed_out, mpeak.bed_str(chrom, strand)
+
+    final_bed_out.close()
+
+    # clean
+    for chrom_key in chrom_files:
+        os.remove(chrom_files[chrom_key])
+
 def main():
     # Setup Primary Variables
     FilePath = os.path.dirname(os.path.abspath(__file__))
@@ -202,6 +435,10 @@ def main():
 
     # Extract Peak Information from BED files
     chrom_files = GetPeaks(Options, target_beds, db_add, target_dbi, FilePath)
+
+    '''Works up to this point!!!!!!!!!!!!'''
+
+    MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath)
 
 if __name__=="__main__":
     main()
