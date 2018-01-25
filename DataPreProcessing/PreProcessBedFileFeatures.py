@@ -70,7 +70,7 @@ def ReadChromSizes(CHROMSIZES):
     return(chrom_lengths)
 
 def GetPeaks(Options, target_beds, db_add, target_dbi):
-    print("Extracting peaks for chromosome specific files...")
+    print("Extracting peaks for chromosome specific files...", file=sys.stdout)
     chrom_files = {}
     chrom_outs = {}
 
@@ -78,14 +78,21 @@ def GetPeaks(Options, target_beds, db_add, target_dbi):
     if db_add:
         peak_beds.append(Options.db_bed)
 
+    n=len(peak_beds)
+    i=0
     for bi in range(len(peak_beds)):
         if peak_beds[bi][-3:] == '.gz':
             peak_bed_in = gzip.open(peak_beds[bi], 'rt', encoding='utf8')
         else:
             peak_bed_in = open(peak_beds[bi], 'r')
 
-        n=len(list(peak_bed_in))
-        for i, line in enumerate(peak_bed_in):
+        print('\r', file=sys.stdout)
+        # the exact output you're looking for:
+        j = (i + 1) / n
+        print("[%-20s] %d%%" % ('=' * int(20 * j), 100 * j), file=sys.stdout)
+        i+=1
+
+        for line in peak_bed_in:
 
             a = line.split('\t')
 
@@ -128,14 +135,8 @@ def GetPeaks(Options, target_beds, db_add, target_dbi):
                 a[6] = str(target_dbi[bi])
                 print('\t'.join(a[:7]), file=chrom_outs[chrom_key])
 
-            print('\r')
-            # the exact output you're looking for:
-            j = (i + 1) / n
-            print("[%-20s] %d%%" % ('=' * int(20 * j), 100 * j))
-            sys.stdout.flush()
-
-        # print('\n', file=sys.stdout)
         peak_bed_in.close()
+        sys.stdout.flush()
 
     # close chromosome-specific files
     for chrom_key in chrom_outs:
