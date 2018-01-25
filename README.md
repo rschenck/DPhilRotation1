@@ -9,6 +9,10 @@ bash ConfEnv.sh
      - Downloads data if necessary.
    - Makes sure that a reference hg19.fa file is present or downloads it.
    - Indexes or sym links hg19.fa.fai
+2. If this script fails run the following:
+```bash
+make clean
+```
 
 **Step 2: Organize ENCODE and Roadmap Epigenomics Data for use**
 ```bash
