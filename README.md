@@ -16,7 +16,8 @@ bash ./DataPreProcessing/MakeBedTables.sh
 ```
 1. This script does the following:
    - Creates a 'data_beds.txt' file. For each row it has an identifier with the corresponding file.
-   - This file will then be used for Step 3.
+   - This file will then be used for Step 3
+
 **Step 3: Prepare Data**
 1. This script does the following:
    - Process bed files from ENCODE and Roadmap Epigenomics
