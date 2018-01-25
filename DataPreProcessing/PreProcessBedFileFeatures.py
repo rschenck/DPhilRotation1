@@ -4,6 +4,8 @@ import os
 import gzip
 import re
 import subprocess
+import time
+from functools import wraps
 from optparse import OptionParser
 import h5py
 import numpy as np
@@ -139,6 +141,18 @@ def UpdateProgress(i, n, DisplayText):
     sys.stdout.write("[%-20s] %d%%\t INFO: %s" % ('=' * int(20 * j), 100 * j, DisplayText))
     sys.stdout.flush()
 
+def fn_timer(function):
+    @wraps(function)
+    def function_timer(*args, **kwargs):
+        t0 = time.time()
+        result = function(*args, **kwargs)
+        t1 = time.time()
+        print ("INFO: Total time running %s: %s minutes" %
+               (function.__name__, str(round((t1-t0)/60.,2)))
+               )
+        return result
+    return function_timer
+
 def activity_set(act_cs):
     ''' Return a set of ints from a comma-separated list of int strings.
 
@@ -198,7 +212,7 @@ class Peak:
             act_str = '.'
         else:
             act_str = ','.join([str(ai) for ai in sorted(list(self.act))])
-        cols = (chrom, str(self.start), str(self.end), '.', '1', strand, act_str)
+        cols = (chrom, str(int(self.start)), str(int(self.end)), '.', '1', strand, act_str)
         return '\t'.join(cols)
 
     def merge(self, peak2, ext_len, chrom_len):
@@ -221,11 +235,11 @@ class Peak:
         merge_mid = int(0.5+np.average(peak_mids, weights=peak_weights))
 
         # extend to the full size
-        merge_start = max(0, merge_mid - ext_len/2)
-        merge_end = merge_start + ext_len
+        merge_start = int(max(0, merge_mid - ext_len/2))
+        merge_end = int(merge_start + ext_len)
         if chrom_len and merge_end > chrom_len:
-            merge_end = chrom_len
-            merge_start = merge_end - ext_len
+            merge_end = int(chrom_len)
+            merge_start = int(merge_end - ext_len)
 
         # merge activities
         merge_act = self.act | peak2.act
@@ -242,6 +256,7 @@ def ReadChromSizes(CHROMSIZES):
         chrom_lengths[a[0]] = int(a[1])
     return(chrom_lengths)
 
+@fn_timer
 def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
     print("INFO: Extracting peaks for chromosome specific files...", file=sys.stdout)
     chrom_files = {}
@@ -352,6 +367,7 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
 
     return (chrom_files)
 
+@fn_timer
 def MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath):
     print("INFO: Constructing peak data and creating Final Bed File...", file=sys.stdout)
     final_bed = "%s.bed"%(FilePath+"/Data/" + Options.out_prefix)
@@ -411,15 +427,16 @@ def MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath):
             # print to file
             for mpeak in mpeaks:
                 print(mpeak.bed_str(chrom, strand), file=final_bed_out)
-
         UpdateProgress(i, n, chrom_key[0])
         i += 1
     final_bed_out.close()
+    sys.stdout.write('\n')
 
     # clean
     for chrom_key in chrom_files:
         os.remove(chrom_files[chrom_key])
 
+@fn_timer
 def main():
     # Setup Primary Variables
     FilePath = os.path.dirname(os.path.abspath(__file__))
@@ -436,6 +453,8 @@ def main():
 
     # Merge Peaks, Extend, and close any open peaks
     MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath)
+
+    "Complete"
 
 if __name__=="__main__":
     main()
