@@ -134,8 +134,8 @@ def GetPeaks(Options, target_beds, db_add, target_dbi):
             sys.stdout.write("[%-20s] %d%%" % ('=' * int(20 * j), 100 * j))
             sys.stdout.flush()
 
+        print('\n', file=sys.stdout)
         peak_bed_in.close()
-        sys.exit()
 
     # close chromosome-specific files
     for chrom_key in chrom_outs:
