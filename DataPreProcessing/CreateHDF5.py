@@ -8,7 +8,8 @@ import numpy as np
 import numpy.random as npr
 import pandas as pd
 import h5py
-from Utils.dna_io import *
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)).rstrip("/DataPreProcessing/") + "/Utils/")
+import Utils
 from Utils.Utils import *
 
 def OptionParsing():
