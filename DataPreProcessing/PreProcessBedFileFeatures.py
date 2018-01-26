@@ -11,7 +11,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)).rstrip("/DataPreProcessing/"))
 from Utils.Utils import fn_timer, UpdateProgress
-sys.exit()
+
 def find_midpoint(start, end):
     # Find the midpoint coordinate between start and end
     mid = (start + end)/2
@@ -240,7 +240,7 @@ def ReadChromSizes(CHROMSIZES):
         chrom_lengths[a[0]] = int(a[1])
     return(chrom_lengths)
 
-@Utils.fn_timer
+@fn_timer
 def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
     print("INFO: Extracting peaks for chromosome specific files...", file=sys.stdout)
     chrom_files = {}
@@ -258,7 +258,7 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
         else:
             peak_bed_in = open(peak_beds[bi], 'r')
 
-        Utils.UpdateProgress(i, n, peak_beds[bi])
+        UpdateProgress(i, n, peak_beds[bi])
         i+=1
 
         for line in peak_bed_in:
@@ -345,13 +345,13 @@ def GetPeaks(Options, target_beds, db_add, target_dbi, FilePath):
         subprocess.call(sort_cmd, shell=True)
         os.remove(chrom_files[chrom_key])
         chrom_files[chrom_key] = chrom_sbed
-        Utils.UpdateProgress(i, n, chrom_key[0])
+        UpdateProgress(i, n, chrom_key[0])
         i+=1
     sys.stdout.write('\n')
 
     return (chrom_files)
 
-@Utils.fn_timer
+@fn_timer
 def MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath):
     print("INFO: Constructing peak data and creating Final Bed File...", file=sys.stdout)
     final_bed = "%s.bed"%(FilePath+"/Data/" + Options.out_prefix)
@@ -360,7 +360,7 @@ def MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath):
     n=len(chrom_files)
     i=0
     for chrom_key in chrom_files:
-        Utils.UpdateProgress(i, n, chrom_key[0])
+        UpdateProgress(i, n, chrom_key[0])
         chrom, strand = chrom_key
 
         open_peaks = []
@@ -411,7 +411,7 @@ def MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath):
             # print to file
             for mpeak in mpeaks:
                 print(mpeak.bed_str(chrom, strand), file=final_bed_out)
-        Utils.UpdateProgress(i, n, chrom_key[0])
+        UpdateProgress(i, n, chrom_key[0])
         i += 1
     final_bed_out.close()
     sys.stdout.write('\n')
@@ -422,7 +422,7 @@ def MakeFinalBed(Options, chrom_files, chrom_lengths, FilePath):
 
     return(final_bed)
 
-@Utils.fn_timer
+@fn_timer
 def ConstructActivityTable(Options, FilePath, final_bed, db_targets):
     print("INFO: Constructing or appending activity table...", file=sys.stdout)
     final_act_out_file = "%s_act.txt"%(FilePath+"/Data/" + Options.out_prefix)
@@ -438,7 +438,7 @@ def ConstructActivityTable(Options, FilePath, final_bed, db_targets):
     i = 0
     with open(final_bed, 'r') as final_bed_in:
         for line in final_bed_in:
-            Utils.UpdateProgress(i, n, 'Building Activity Table')
+            UpdateProgress(i, n, 'Building Activity Table')
             i += 1
 
             a = line.rstrip().split('\t')
@@ -458,7 +458,7 @@ def ConstructActivityTable(Options, FilePath, final_bed, db_targets):
 
     final_act_out.close()
 
-@Utils.fn_timer
+@fn_timer
 def main():
     # Setup Primary Variables
     FilePath = os.path.dirname(os.path.abspath(__file__))
