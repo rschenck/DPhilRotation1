@@ -9,7 +9,7 @@ from optparse import OptionParser
 import h5py
 import numpy as np
 
-# sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)).rstrip("/DataPreProcessing/"))
 from Utils.Utils import fn_timer, UpdateProgress
 sys.exit()
 def find_midpoint(start, end):
