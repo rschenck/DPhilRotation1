@@ -63,6 +63,11 @@ python ./DataPreProcessing/PreProcessBedFileFeatures.py -f DataPreProcessing/Dat
 python ./DataPreProcessing/CreateHDF5 --help
 
 # Sample to execute code
-python ./DataPreProcessing/CreateHDF5.py --fasta ./DataPreProcessing/Data/TestRun.fa --target ./DataPreProcessing/Data/TestRun_act.txt -o ./DataPreProcessing/Model/TestRun.h5 -c -r -p 1500 -v 1000
+python ./DataPreProcessing/CreateHDF5.py --fasta ./DataPreProcessing/Data/TestRun.fa --target ./DataPreProcessing/Data/TestRun_act.txt -o ./DataPreProcessing/ModelData/TestRun.h5 -c -r -p 1500 -v 1000
 ```
+###### This script, just like above, takes a decent amount of time to run.
+1. This script does the following
+   - Determines the longest sequence (if they are not equal)
+   - Hot Codes the sequences into arrays of the proper dimensions.
+   - More....
 
