@@ -63,7 +63,7 @@ python ./DataPreProcessing/CreateHDF5 --help
 # Sample to execute code
 python ./DataPreProcessing/CreateHDF5.py --fasta ./DataPreProcessing/Data/TestRun.fa --target ./DataPreProcessing/Data/TestRun_act.txt -o TestRun.h5 -c -r -p 1500 -v 1000
 ```TestRun
-###### This script, just like above, takes a decent amount of time to run.
+###### This script, just like above, takes a decent amount of time to run (~21.37 minutes).
 2. Create HDF5 files for use within the model and split for training, validation, and testing using CreateHDF5.py:
    - Determines the longest sequence (if they are not equal)
    - Hot Codes the sequences into arrays of the proper dimensions.

@@ -105,9 +105,6 @@ class Data:
         self.seqs = seqs
         self.targets = targets
         self.headers = headers
-        print(self.headers)
-        print(self.headers[0])
-        print(type(self.headers))
         self.df_add = df_add
         self.target_labels = target_labels
         train_seqs = None
