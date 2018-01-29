@@ -65,3 +65,7 @@ python ./DataPreProcessing/CreateHDF5 --help
 # Sample to execute code
 python ./DataPreProcessing/CreateHDF5.py --fasta ./DataPreProcessing/Data/TestRun.fa --target ./DataPreProcessing/Data/TestRun_act.txt -o ./DataPreProcessing/Model/TestRun.h5 -c -r -p 1500 -v 1000
 '''
+
+All Done
+1. Test
+   - Test
