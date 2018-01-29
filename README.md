@@ -12,7 +12,7 @@ Portions of this code have been adapted from [Basset](https://github.com/davek44
    - sklearn
 2. Further dependencies will be checked in Step 1.
 
-## Using the code
+## Preprocessing the data
 
 **Step 1: Checking the Environment**
 ```bash
@@ -58,4 +58,10 @@ python ./DataPreProcessing/PreProcessBedFileFeatures.py -f DataPreProcessing/Dat
      - Constructs a FASTA file using bedtools getfasta
 
 2. Create HDF5 files for use within the model and split for training, validation, and testing.
+'''bash
+# View the different options for this code
+python ./DataPreProcessing/CreateHDF5 --help
 
+# Sample to execute code
+python ./DataPreProcessing/CreateHDF5.py --fasta ./DataPreProcessing/Data/TestRun.fa --target ./DataPreProcessing/Data/TestRun_act.txt -o ./DataPreProcessing/Model/TestRun.h5 -c -r -p 1500 -v 1000
+'''

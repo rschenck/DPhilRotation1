@@ -7,6 +7,7 @@ from Utils.Utils import *
 import numpy as np
 import numpy.random as npr
 from sklearn import preprocessing
+import logging
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)).rstrip("/DataPreProcessing/"))
 from Utils.Utils import fn_timer, UpdateProgress
@@ -247,7 +248,6 @@ def hash_scores(scores_file):
 
     return seq_scores
 
-
 ################################################################################
 # hash_sequences_1hot
 #
@@ -258,7 +258,6 @@ def hash_scores(scores_file):
 # Output
 #  seq_vecs:    Dict mapping FASTA headers to sequence representation vectors.
 ################################################################################
-@fn_timer
 def hash_sequences_1hot(fasta_file, extend_len=None):
     print("INFO: Obtaining longest sequence...", file=sys.stdout)
     cmd = "wc -l %s" % (fasta_file)
@@ -269,31 +268,17 @@ def hash_sequences_1hot(fasta_file, extend_len=None):
     if extend_len is not None:
         seq_len = extend_len
     else:
-        seq_len = 0
-        seq = ''
-        with open(fasta_file, 'r') as fastaIn:
-            for line in fastaIn:
-                UpdateProgress(i,n,str(i)+"/"+str(n)+" Sequences")
-                i+=1
-                if line[0] == '>':
-                    if seq:
-                        seq_len = max(seq_len, len(seq))
-                    header = line[1:].rstrip()
-                    seq = ''
-
-
-                else:
-                    seq += line.rstrip()
-
-        sys.stdout.write("\n")
-
-        if seq:
-            seq_len = max(seq_len, len(seq))
+        cmd1 = "awk '/^>/ { if (seqlen) { print seqlen }; seqtotal+=seqlen; seqlen=0; seq+=1; next } { seqlen += length($0) } END{print seqlen }' %s" % (fasta_file)
+        cmd2 = 'grep -v ">"'
+        cmd3 = "awk '{if(min==inf){min=max=$1}; if($1>max) {max=$1}; if($1<min) {min=$1}; total+=$1; count+=1} END {print max}'"
+        cmd = " | ".join([cmd1, cmd2, cmd3])
+        pipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE).stdout
+        seq_len = int(pipe.read().decode("utf-8").lstrip(" ").split(" ")[0])
 
     # load and code sequences
     seq_vecs = OrderedDict()
     seq = ''
-    i=0
+    i = 0
     print("INFO: Loading in and coding sequences...")
     with open(fasta_file, 'r') as fastaIn:
         for line in fastaIn:
@@ -312,8 +297,7 @@ def hash_sequences_1hot(fasta_file, extend_len=None):
     if seq:
         seq_vecs[header] = dna_one_hot(seq, seq_len)
 
-    return(seq_vecs, n)
-
+    return (seq_vecs, n)
 
 ################################################################################
 # load_data_1hot
