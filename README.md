@@ -58,14 +58,11 @@ python ./DataPreProcessing/PreProcessBedFileFeatures.py -f DataPreProcessing/Dat
      - Constructs a FASTA file using bedtools getfasta
 
 2. Create HDF5 files for use within the model and split for training, validation, and testing.
-'''bash
+```bash
 # View the different options for this code
 python ./DataPreProcessing/CreateHDF5 --help
 
 # Sample to execute code
 python ./DataPreProcessing/CreateHDF5.py --fasta ./DataPreProcessing/Data/TestRun.fa --target ./DataPreProcessing/Data/TestRun_act.txt -o ./DataPreProcessing/Model/TestRun.h5 -c -r -p 1500 -v 1000
-'''
+```
 
-All Done
-1. Test
-   - Test
