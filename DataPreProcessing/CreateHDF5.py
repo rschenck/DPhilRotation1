@@ -8,9 +8,10 @@ import numpy as np
 import numpy.random as npr
 import pandas as pd
 import h5py
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)).rstrip("/DataPreProcessing/") + "/Utils/")
-import Utils
-from Utils.Utils import *
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)).rstrip("/DataPreProcessing/"))
+from Utils.Utils import fn_timer, UpdateProgress
+from Utils.dna_io import load_data_1hot
 
 def OptionParsing():
     usage = 'usage: %prog [options] -f <fasta_file> -t <targets_file> -o <out_file>'
@@ -36,14 +37,19 @@ def OptionParsing():
         parser.error('ERROR: Must provide fasta file, targets file, and an output prefix')
     return(options, parser)
 
-@fn_timer
 def LoadData(Options):
     print("INFO: Loading in sequences and targets as hot sequence...", file=sys.stdout)
-    seqs, targets = load_data_1hot(Options.fasta_file, Options.targets_file, extend_len=Options.extend_length, mean_norm=False, whiten=False, permute=False, sort=False)
+    seqs, targets, n = load_data_1hot(Options.fasta_file, Options.targets_file, extend_len=Options.extend_length, mean_norm=False, whiten=False, permute=False, sort=False)
 
-    sys.exit("COMPLETED UP TO HERE...NEED TO REWORK THE REST...")
+    print("INFO: Sequence array shape...")
+    print(seqs.shape)
+    print(seqs)
+    print("INFO: Reshaping sequence array...")
     # reshape sequences for torch
-    seqs = seqs.reshape((seqs.shape[0],4,1,seqs.shape[1]/4))
+    seqs = seqs.reshape((seqs.shape[0],4,1,int(seqs.shape[1]/4)))
+    print("INFO: Sequence array shape...")
+    print(seqs.shape)
+    print(seqs)
 
     # read headers
     print("INFO: Reading headers of fasta file...", file=sys.stdout)
@@ -54,7 +60,7 @@ def LoadData(Options):
         for line in inputFile:
             if line[0] == '>':
                 headers.append(line[1:].rstrip())
-            UpdateProgress(i, n, '')
+            UpdateProgress(i, n, '%s/%s'%(i,n))
             i+=1
     headers = np.array(headers)
     sys.stdout.write('\n')

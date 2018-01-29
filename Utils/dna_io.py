@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 import sys
+import os
 from collections import OrderedDict
 import subprocess
 from Utils.Utils import *
 import numpy as np
 import numpy.random as npr
 from sklearn import preprocessing
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)).rstrip("/DataPreProcessing/"))
+from Utils.Utils import fn_timer, UpdateProgress
 
 ################################################################################
 # dna_io.py
@@ -262,7 +266,6 @@ def hash_sequences_1hot(fasta_file, extend_len=None):
     n = int(pipe.read().decode("utf-8").lstrip(" ").split(" ")[0])
     i = 0
 
-    # determine longest sequence
     if extend_len is not None:
         seq_len = extend_len
     else:
@@ -275,11 +278,13 @@ def hash_sequences_1hot(fasta_file, extend_len=None):
                 if line[0] == '>':
                     if seq:
                         seq_len = max(seq_len, len(seq))
-
                     header = line[1:].rstrip()
                     seq = ''
+
+
                 else:
                     seq += line.rstrip()
+
         sys.stdout.write("\n")
 
         if seq:
@@ -307,7 +312,7 @@ def hash_sequences_1hot(fasta_file, extend_len=None):
     if seq:
         seq_vecs[header] = dna_one_hot(seq, seq_len)
 
-    return seq_vecs
+    return(seq_vecs, n)
 
 
 ################################################################################
@@ -324,7 +329,7 @@ def hash_sequences_1hot(fasta_file, extend_len=None):
 @fn_timer
 def load_data_1hot(fasta_file, scores_file, extend_len=None, mean_norm=True, whiten=False, permute=True, sort=False):
     # load sequences
-    seq_vecs = hash_sequences_1hot(fasta_file, extend_len) # Implemented Timer and Update functions
+    seq_vecs, n = hash_sequences_1hot(fasta_file, extend_len) # Implemented Timer and Update functions
 
     # load scores
     seq_scores = hash_scores(scores_file)
@@ -344,7 +349,7 @@ def load_data_1hot(fasta_file, scores_file, extend_len=None, mean_norm=True, whi
         train_seqs = train_seqs[order]
         train_scores = train_scores[order]
 
-    return train_seqs, train_scores
+    return train_seqs, train_scores, n
 
 
 ################################################################################
