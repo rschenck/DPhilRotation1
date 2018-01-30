@@ -13,7 +13,8 @@
 Rscript ./DataViz/PreProcessDataFrames.R --act_table=TestRun_act.txt
 ```
 1. Creates .RData files and places them within the VizData directory. Will do the following:
-   - Put the activity into the proper format.
+   - Put the activity table into the proper format.
    - Obtain the ranges for chromosomes.
+   - Create mapped tables for cell lines with additional information
    - Give you the option to create some plots in a pdf.
 
