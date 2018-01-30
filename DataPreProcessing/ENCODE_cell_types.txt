@@ -1,0 +1,201 @@
+Tier	cell	Description	Lineage	Tissue	Karyotype	Sex
+1	GM12878	B-lymphocyte, lymphoblastoid, International HapMap Project - CEPH/Utah - European Caucasion, Epstein-Barr Virus	mesoderm	blood	normal	F
+1	H1hESC	embryonic stem cells	inner cell mass	embryonic stem cell	normal	M
+1	K562	leukemia, "The continuous cell line K-562 was established by Lozzio and Lozzio from the pleural effusion of a 53-year-old female with chronic myelogenous leukemia in terminal blast crises." - ATCC	mesoderm	blood	cancer	F
+2	A549	epithelial cell line derived from a lung carcinoma tissue. (PMID: 175022), "This line was initiated in 1972 by D.J. Giard, et al. through explant culture of lung carcinomatous tissue from a 58-year-old caucasian male." - ATCC, newly promoted to tier 2: not in 2011 analysis	endoderm	epithelium	cancer	M
+2	CD20	B cells from donors RO01778 and RO01794, newly promoted to tier 2: not in 2011 analysis	mesoderm	blood	normal	F
+2	CD20RO01778	B cells, caucasian, draw number 1, newly promoted to tier 2: not in 2011 analysis	mesoderm	blood	normal	F
+2	CD20RO01794	B cells, African American, draw number 1, newly promoted to tier 2: not in 2011 analysis	mesoderm	blood	normal	F
+2	H1neurons	neurons derived from H1 embryonic stem cells, newly promoted to tier 2: not in 2011 analysis	ectoderm	neurons	normal	M
+2	HeLaS3	cervical carcinoma	ectoderm	cervix	cancer	F
+2	HepG2	hepatocellular carcinoma	endoderm	liver	cancer	M
+2	HUVEC	umbilical vein endothelial cells	mesoderm	blood vessel	normal	U
+2	IMR90	fetal lung fibroblasts, newly promoted to tier 2: not in 2011 analysis	endoderm	lung	normal	F
+2	LHCNM2	skeletal myoblasts derived from satellite cells from the pectoralis major muscle of a 41 year old caucasian heart transplant donor, immortalized with lox-hygro-hTERT ("LH"), and Cdk4-neo ("CN"), Zhu et al. (2007) in Aging Cell, vol. 6, pp 515-523, newly promoted to tier 2: not in 2011 analysis.	mesoderm	skeletal muscle myoblast	M
+2	MCF7	mammary gland, adenocarcinoma. (PMID: 4357757), newly promoted to tier 2: not in 2011 analysis	ectoderm	breast	cancer	F
+2	MonoCD14	Monocytes-CD14+ are CD14-positive cells from human leukapheresis production, from donor RO 01746 (draw 1 ID is RO 01746, draw 2 ID is RO 01826), newly promoted to tier 2: not in 2011 analysis	mesoderm	monocytes	normal	F
+2	MonoCD14RO01826	Monocytes-CD14+ are CD14-positive cells from human leukapheresis production, Monocytes-CD14+_RO01826 is a second draw being used as a replicate for Monocytes-CD14+_RO01746, newly promoted to tier 2: not in 2011 analysis	mesoderm	monocytes	normal	F
+2	MonoCD14RO1746	Monocytes-CD14+ are CD14-positive cells from human leukapheresis production, from donor RO 01746 (draw 1 ID is RO 01746, draw 2 ID is RO 01826), Monocytes-CD14+_RO01746 and Monocytes-CD14+_RO01826 are being used as replicates, newly promoted to tier 2: not in 2011 analysis	mesoderm	monocytes	normal	F
+2	SKNSH	neuroblastoma, newly promoted to tier 2: not in 2011 analysis, the SK-N-SH line was established from a neuroblastoma in a 4 year old individual.	ectoderm	brain	cancer	F
+3	8988T	pancreas adenocarcinoma (PA-TU-8988T), "established in 1985 from the liver metastasis of a primary pancreatic adenocarcinoma from a 64-year-old woman" - DSMZ	endoderm	liver	cancer	F
+3	AdultCD4naive	CD4+ cells isolated from human blood and enriched for naive populations	mesoderm	blood	normal	B
+3	AdultCD4Th0	CD4+ cells isolated from human blood and enriched for Th0 populations	mesoderm	blood	normal	B
+3	AdultCD4Th1	CD4+ cells isolated from human blood and enriched for Th1 populations	mesoderm	blood	normal	B
+3	AG04449	fetal buttock/thigh fibroblast	skin	normal	M
+3	AG04450	fetal lung fibroblast	endoderm	lung	normal	M
+3	AG09309	adult toe fibroblast from apparently healthy 21 year old, "7% of the cells examined showing random chromosome loss/gain" -Coriell	skin	F
+3	AG09319	gum tissue fibroblasts from apparently heathly 24 year old	gingival	normal	F
+3	AG10803	abdominal skin fibroblasts from apparently heathly 22 year old, "8% of the cells examined showing random chromosome loss, 2% showing random chromosome gain, and 2% showing 69,XYY" -Coriell	skin	M
+3	AoAF	aortic adventitial fibroblast cells	mesoderm	blood vessel	normal	F
+3	AoSMC	aortic smooth muscle cells	mesoderm	blood vessel	normal	U
+3	BCAdiposeUHN00001	adipose tissue, donor UHN0001, age 35, African American, DNA extract	adipose tissue	normal	F
+3	BCAdrenalGlandH12803N	adrenal gland, donor H12803N, age 88, caucasian, DNA extract	ectoderm, mesoderm	adrenal gland	normal	F
+3	BCBladder0111002	urinary bladder, donor 01-11002, age 83, caucasian, DNA extract	endoderm	urinary bladder	normal	F
+3	BCBrainH11058N	brain, donor H11058N, age 66, Asian, DNA extract	ectoderm	brain	normal	M
+3	BCBreast0203015	breast, donor 02-03015, age 21, caucasian, DNA extract	ectoderm	breast	normal	F
+3	BCColon0111002	colon, donor 01-11002, age 83, caucasian, DNA and RNA extract	endoderm	colon	normal	F
+3	BCColonH12817N	colon, donor H12817N, age 71, caucasian, DNA and RNA extract	endoderm	colon	normal	M
+3	BCEsophagus0111002	esophagus, donor 01-11002, age 83, caucasian, DNA and RNA extract	endoderm	esophagus	normal	F
+3	BCEsophagusH12817N	esophagus, donor H12817N, age 71, caucasian, DNA extract	endoderm	esophagus	normal	M
+3	BCJejunumH12817N	jejunum, donor H12817N, age 71, caucasian, DNA and RNA extract	endoderm	jejunum	normal	M
+3	BCKidney0111002	kidney, donor 01-11002, age 83, caucasian, DNA and RNA extract	mesoderm	kidney	normal	F
+3	BCKidneyH12817N	kidney, donor H12817N, age 71, caucasian, DNA and RNA extract	mesoderm	kidney	normal	M
+3	BCLeftVentricleN41	left ventricle, donor N41, age 26, Asian, DNA extract	mesoderm	left ventricle	normal	M
+3	BCLeukocyteUHN00204	peripheral blood mononuclear cell, donor UHN00204, age 54, caucasian, DNA extract	mesoderm	blood	normal	M
+3	BCLiver0111002	liver, donor 01-11002, age 83, caucasian, DNA and RNA extract	endoderm	liver	normal	F
+3	BCLung0111002	lung, donor 01-11002, age 83, caucasian, DNA and RNA extract	endoderm	lung	normal	F
+3	BCLungH12817N	lung, donor H12817N, age 71, caucasian, DNA and RNA extract	endoderm	lung	normal	M
+3	BCPancreasH12817N	pancreas, donor H12817N, age 71, caucasian, DNA and RNA extract	endoderm	pancreas	normal	M
+3	BCPenisH12817N	penis, donor H12817N, age 71, caucasian, DNA extract	mesoderm	penis	normal	M
+3	BCPericardiumH12529N	pericardium, donor H12529N, age 70, caucasian, DNA extract	mesoderm	pericardium	normal	F
+3	BCPlacentaUHN00189	placenta, donor UHN00189, age 29	extraembryonic mesoderm, trophectoderm	placenta	normal	F
+3	BCProstateGlandH12817N	prostate gland, donor H12817N, age 71, caucasian, DNA extract	endoderm	prostate gland	normal	M
+3	BCRectumN29	rectum, donor N29, age 29, Asian, DNA extract	endoderm	rectum	normal	M
+3	BCSkeletalMuscle0111002	skeletal muscle, donor 01-11002, age 83, caucasian, DNA and RNA extract	mesoderm	skeletal muscle	normal	F
+3	BCSkeletalMuscleH12817N	skeletal muscle, donor H12817N, age 71, caucasian, DNA and RNA extract	mesoderm	skeletal muscle	normal	M
+3	BCSkin0111002	skin, donor 01-11002, age 83, caucasian, DNA extract	ectoderm, mesoderm	skin	normal	F
+3	BCSmallIntestine0111002	small intestine, donor 01-11002, age 83, caucasian, DNA and RNA extract	endoderm	small intestine	normal	F
+3	BCSpleenH12817N	spleen, donor H12817N, age 71, caucasian, DNA and RNA extract	mesoderm	spleen	normal	M
+3	BCStomach0111002	stomach, donor 01-11002, age 83, caucasian, DNA extract	endoderm	stomach	normal	F
+3	BCStomachH12817N	stomach, donor H12817N, age 71, caucasian, DNA and RNA extract	endoderm	stomach	normal	M
+3	BCTestisN30	testis, donor N30, age 41, Asian, DNA extract	mesoderm	testis	normal	M
+3	BCUterusBN0765	uterus, donor BN0765, age 44, Asian, DNA extract	uterus	normal	F
+3	BE2C	neuroblastoma, BE-C is a clone of the SK-N-BE neuroblastoma cell line (see ATCC CRL-2271) that was established in November of 1972 from a bone marrow biopsy taken from a 2-year-old individual with disseminated neuroblastoma after repeated courses of chemotherapy and radiotherapy.	ectoderm	brain	cancer	M
+3	BG02ES	embryonic stem cell (hESC), BG02, treatment: H9 conditioned medium	inner cell mass	embryonic stem cell	normal	M
+3	BG02ESEBD	embryonic stem cell (hESC), BG02, embryoid body-derived	inner cell mass	embryonic stem cell	normal	M
+3	BJ	skin fibroblast, "The line was established from skin taken from normal foreskin." - ATCC. (PMID: 9916803)	skin	normal	M
+3	bonemarrowHS27a	HS27a Human Marrow Stromal Cells are fibroblastoid cells immortalized with HPV16 E6/E7 genes as described in Roecklein and Torok-Storb, 1995 Blood 85:997-1005, insert DNA is LXSN-16 E6E7 packaged in PA31.	bone marrow	normal	M
+3	bonemarrowHS5	HS5 Human Marrow Stromal Cells are fibroblastoid cells immortalized with HPV16 E6/E7 genes as described in Roecklein and Torok-Storb, 1995 Blood 85:997-1005, insert DNA is LXSN-16 E6E7 packaged in PA31.	bone marrow	normal	M
+3	bonemarrowMSC	These cells are primary fibroblastoid cells obtained from human bone marrow of normal donors as described in Roecklein and Torok-Storb, 1995 Blood 85:997-1005.	bone marrow	normal	M
+3	BreastOC	Primary frozen breast tissue from NCTC donor IDs 11-0068A (Rep B1) and 11-0067A (Rep B2), both African American	breast	normal	F
+3	Caco2	colorectal adenocarcinoma. (PMID: 1939345)	endoderm	colon	cancer	M
+3	CD34Mobilized	hematopoietic progenitor cells- mobilized, from donor RO01679.	blood	M
+3	CD4NaiveWb11970640	CD4+ naive sorted cells, donor is Caucasian, male 26 year old, primary pheresis of single normal subject	mesoderm	blood	normal	M
+3	CD4NaiveWb78495824	CD4+ naive sorted cells, donor is Causasian, female 35 year old, primary pheresis of single normal subject	mesoderm	blood	normal	F
+3	CerebellumOC	Primary frozen cerebellum tissue from NICHD donor IDs 1104 (Rep B1), 602 (Rep B2), 1442 (Rep B3), all Caucasian	cerebellum	normal	M
+3	CerebrumfrontalOC	Primary frozen frontal cerebrum tissue from NICHD donor IDs 1104 (Rep B1), 602 (Rep B2), 1442 (Rep B3), all Caucasian	frontal cerebrum	normal	M
+3	Chorion	chorion cells (outermost of two fetal membranes), fetal membranes were collected from women who underwent planned cesarean delivery at term, before labor and without rupture of membranes.	extraembryonic mesoderm, trophectoderm	fetal membrane	U
+3	CLL	chronic lymphocytic leukemia cell, T-cell lymphocyte	mesoderm	blood	cancer	F
+3	CMK	acute megakaryocytic leukemia cells, "established from the peripheral blood of a 10-month-old boy with Down's syndrome and acute megakaryocytic leukemia (AML M7) at relapse in 1985" - DSMZ. (PMID: 3016165)	mesoderm	blood	cancer	M
+3	Colo829	malignant melanoma	skin	cancer	M
+3	ColonBC	colon, parent cell type to donors BC_01-11002 and BC_H12817N	endoderm	colon	normal	B
+3	ColonOC	Primary frozen colon tissue from NCTC donor IDs 10-0005A (Rep B1) and 10-0170A (Rep B2), African American and caucasian	colon	normal	B
+3	CordCD4naive	CD4+ cells isolated from cord blood and enriched for naive populations	mesoderm	blood	normal	B
+3	CordCD4Th0	CD4+ cells isolated from cord blood and enriched for Th0 populations	mesoderm	blood	normal	B
+3	CordCD4Th1	CD4+ cells isolated from cord blood and enriched for Th1 populations	mesoderm	blood	normal	B
+3	Decidua	decidua cells (part of the mucous membrane lining uterus), Fetal membranes were collected from women who underwent planned cesarean delivery at term, before labor and without rupture of membranes	decidua	cervix	F
+3	Dnd41	T cell leukemia with Notch mutation	mesoderm	blood	cancer	M
+3	ECC1	epithelial cell line derived from an endometrium adenocarcinoma, fetal membranes were collected from women who underwent planned cesarean delivery at term, before labor and without rupture of membranes	endoderm	luminal epithelium	cancer	F
+3	EndometriumOC	Endometrium isolated from uterine lining	endometrium	normal	F
+3	EsophagusBC	esophagus, parental cell type to donors 01-11002 and H12817N	endoderm	esophagus	normal	B
+3	Fibrobl	child fibroblast	skin	normal	F
+3	FibroblGM03348	skin fibroblast	skin	normal	M
+3	FibroP	fibroblasts taken from individuals with Parkinson's disease, AG20443, AG08395 and AG08396 were pooled for this sample	skin	normal	U
+3	FibroPAG08395	fibroblasts taken from individuals with Parkinson's disease	skin fibroblast	F
+3	FibroPAG08396	fibroblasts taken from individuals with Parkinson's disease	lung fibroblast	F
+3	FibroPAG20443	fibroblasts taken from individuals with Parkinson's disease	skin fibroblast	M
+3	FrontalcortexOC	Primary ventromedial prefrontal cortex, from KPBBB donor IDs 673 (Rep B1) and 913 (Rep B2)	frontal cortex	normal	F
+3	GCBcell	Germinal center B cells (CD77+) isolated from de-identified tonsillectomy	tonsil	normal	U
+3	Gliobla	glioblastoma, these cells (aka H54 and D54) come from a surgical resection from a patient with glioblastoma multiforme (WHO Grade IV). D54 is a commonly studied glioblastoma cell line (Bao et al., 2006) that has been thoroughly described by S Bigner (1981). (PMID: 7252524)	ectoderm	brain	cancer	U
+3	GM04503	adult twin pair fibroblasts, monozygotic twin of GM04504	skin	normal	F
+3	GM04504	adult twin pair fibroblasts, monozygotic twin of GM04503, 13% of the cells examined show random chromosome loss	skin	normal	F
+3	GM06990	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah, treatment: Epstein-Barr Virus transformed	mesoderm	blood	F
+3	GM08714	lymphoblastoid cell line, Instability of heterochromatin of chromosomes 1, 9, and 16 with variable combined immunodeficiency; dysmorphic facial features, developmental delay, malabsorption, and recurrent infections; see GM08747 Fibroblast; donor subject is a compound heterozygote: one allele has a G>A transition at nucleotide 1807 (1807G>A) of the DNMT3B gene resulting in an Ala to Thr substitution at codon 603 [Ala603Thr (A603T)], the mutation occurring in a region between motifs I and IV within the catalytic domain of DNMT3B; the second allele has a G>A transition within intron 22 located 11 nucleotides 5-prime of the normal splice acceptor site [IVS22AS,G>A,-11] resulting in the generation of a novel splice acceptor site and a 9-bp insertion in the processed RNA. This results in the insertion of 3 amino acids (serine, threonine, and proline) at codon 744 (744ins3). The insertion was within the conserved region of the catalytic domain, which is likely to be disrupted by the insertion of a proline residue. This mutation was de novo.	mesoderm	blood	F
+3	GM10248	lymphoblastoid cell line, Clinically normal; 4 paternal cousins have Cornelia de Lange syndrome; 46,XY, t(3;22)(q25.3;p12)	mesoderm	blood	normal	M
+3	GM10266	lymphoblastoid cell line, De Lange phenotype; developmental delay; profound retardation; seizures; 3 cousins are also affected; 46,XY,-22,+der (22)t(3;22)(q25.3;p12)	mesoderm	blood	affected	M
+3	GM10847	lymphoblastoid, International HapMap Project, CEPH/Utah, treatment: Epstein-Barr Virus transformed	mesoderm	blood	F
+3	GM12801	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah, treatment: Epstein-Barr Virus transformed	mesoderm	blood	M
+3	GM12812	B-Lymphocyte, Lymphoblastoid, International HapMap Project, CEPH/Utah, Treatment: Epstein-Barr Virus transformed	mesoderm	blood	M
+3	GM12813	B-Lymphocyte, Lymphoblastoid, International HapMap Project, CEPH/Utah, Treatment: Epstein-Barr Virus transformed	mesoderm	blood	F
+3	GM12864	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1459, treatment: Epstein-Barr Virus transformed	mesoderm	blood	M
+3	GM12865	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1459, treatment: Epstein-Barr Virus transformed	mesoderm	blood	F
+3	GM12866	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1459, treatment: Epstein-Barr Virus transformed.	mesoderm	blood	M
+3	GM12867	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1459, treatment: Epstein-Barr Virus transformed.	mesoderm	blood	F
+3	GM12868	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1459, treatment: Epstein-Barr Virus transformed.	mesoderm	blood	F
+3	GM12869	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1459, treatment: Epstein-Barr Virus transformed.	mesoderm	blood	F
+3	GM12870	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1459, treatment: Epstein-Barr Virus transformed.	mesoderm	blood	M
+3	GM12871	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1459, treatment: Epstein-Barr Virus transformed.	mesoderm	blood	M
+3	GM12872	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1459, treatment: Epstein-Barr Virus transformed	mesoderm	blood	M
+3	GM12873	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1459, treatment: Epstein-Barr Virus transformed	mesoderm	blood	F
+3	GM12874	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1459, treatment: Epstein-Barr Virus transformed	mesoderm	blood	M
+3	GM12875	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1459, treatment: Epstein-Barr Virus transformed	mesoderm	blood	F
+3	GM12878XiMat	B-lymphocyte, lymphoblastoid, cloned for maternal X inactivation, International HapMap Project, CEPH/Utah, Epstein-Barr Virus	mesoderm	blood	normal	F
+3	GM12891	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1463, treatment: Epstein-Barr Virus transformed	mesoderm	blood	M
+3	GM12892	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1463, treatment: Epstein-Barr Virus transformed	mesoderm	blood	F
+3	GM13976	lymphoblastoid cell line, clinically normal; monozygotic twin sister with Cornelia De Lange syndrome is GM13977	mesoderm	blood	normal	F
+3	GM13977	lymphoblastoid cell line, Clinically affected; microcephaly; low frontal hairline; synophris; "penciled" arched eyebrows; short nose; crescent shaped mouth; hirsutism; micromelia; short thumbs; mental retardation; clinically normal monozygotic twin sister is GM13976	mesoderm	blood	affected	F
+3	GM15510	lymphoblastoid NIGMS Human Genetic Cell Repository, DNA Polymorphism Discovery Resource Collection, treatment: Epstein-Barr Virus transformed	mesoderm	blood	U
+3	GM18505	lymphoblastoid, International HapMap Project, Yoruba in Ibadan, Nigera, treatment: Epstein-Barr Virus transformed	mesoderm	blood	F
+3	GM18507	lymphoblastoid, International HapMap Project, Yoruba in Ibadan, Nigera, treatment: Epstein-Barr Virus transformed	mesoderm	blood	M
+3	GM18526	lymphoblastoid, International HapMap Project, Han Chinese in Beijing, China, treatment: Epstein-Barr Virus transformed	mesoderm	blood	F
+3	GM18951	lymphoblastoid, International HapMap Project, Japanese in Tokyo, Japan, treatment: Epstein-Barr Virus transformed	mesoderm	blood	F
+3	GM19099	lymphoblastoid, International HapMap Project, Yoruba in Ibadan, Nigera, treatment: Epstein-Barr Virus transformed	mesoderm	blood	F
+3	GM19193	lymphoblastoid, International HapMap Project, Yoruba in Ibadan, Nigera, treatment: Epstein-Barr Virus transformed	mesoderm	blood	F
+3	GM19238	B-lymphocyte, lymphoblastoid, International HapMap Project, Yoruba in Ibadan, Nigera, treatment: Epstein-Barr Virus transformed	mesoderm	blood	F
+3	GM19239	B-lymphocyte, lymphoblastoid, International HapMap Project, Yoruba in Ibadan, Nigera, treatment: Epstein-Barr Virus transformed	mesoderm	blood	M
+3	GM19240	B-lymphocyte, lymphoblastoid, International HapMap Project, Yoruba in Ibadan, Nigera, treatment: Epstein-Barr Virus transformed	mesoderm	blood	F
+3	GM20000	lymphoblastoid cell line, De Lange phenotype; developmental delay; profound retardation	mesoderm	blood	affected	M
+3	H0287	EBV-transformed lymphoblastoid cell line (LCL) was derived from peripheral blood donated by a normal healthy male.	mesoderm	blood	normal	M
+3	H7ES	undifferentiated embryonic stem cells	inner cell mass	U
+3	H9ES	embryonic stem cell (hESC) H9	inner cell mass	embryonic stem cell	F
+3	H9ESAFP	embryonic stem cell (hESC), H9-derived, treatment: H9 AFP-	inner cell mass	embryonic stem cell	F
+3	H9ESAFP	embryonic stem cell (hESC), H9-derived, treatment: H9 AFP+	inner cell mass	embryonic stem cell	F
+3	H9ESCM	embryonic stem cell (hESC) H9, treatment: H9 conditioned medium	inner cell mass	embryonic stem cell	F
+3	H9ESE	embryonic stem cell (hESC) H9, endoderm	inner cell mass	embryonic stem cell	F
+3	H9ESEB	embryonic stem cell (hESC) H9, embryoid bodies	inner cell mass	embryonic stem cell	F
+3	H9ESEBD	embryonic stem cell (hESC) H9, embryoid body-derived	inner cell mass	embryonic stem cell	F
+3	HAc	astrocytes-cerebellar	ectoderm	cerebellar	normal	U
+3	HAE	amniotic epithelial cells	epithelium	normal	U
+3	HAh	astrocytes-hippocampal	ectoderm	brain hippocampus	normal	U
+3	HAL	adult liver, genomic DNA purified from surgically excised adult human liver	endoderm	liver	U
+3	HAoAF	Aortic Adventitial Fibroblasts from two individuals, HAoAF_6090101.11 and HAoAF_6111301.9 from tunica adventitia	mesoderm	blood vessel	normal	B
+3	HAoAF6090101.11	Aortic Adventitial Fibroblasts from tunica adventitia	mesoderm	blood vessel	normal	M
+3	HAoAF6111301.9	Aortic Adventitial Fibroblasts from tunica adventitia	mesoderm	blood vessel	normal	F
+3	HAoEC	Aortic Endothelial Cells (thoracic) from two individuals, HAoEC_7071706.1 and HAoEC_8061102.1	mesoderm	blood vessel	normal	B
+3	HAoEC7071706.1	Aortic Endothelial Cells	mesoderm	blood vessel	normal	F
+3	HAoEC8061102.1	Aortic Endothelial Cells from throracic	mesoderm	blood vessel	normal	M
+3	HAsp	astrocytes spinal cord	ectoderm	spinal cord	normal	U
+3	HBMEC	brain microvascular endothelial cells	mesoderm	blood vessel	normal	U
+3	HBVP	brain vascular pericytes	mesoderm	blood vessel	normal	U
+3	HBVSMC	brain vascular smooth muscle cells.	mesoderm	blood vessel	normal	F
+3	HCF	cardiac fibroblasts	mesoderm	heart	normal	U
+3	HCFaa	cardiac fibroblasts- adult atrial	mesoderm	heart	normal	F
+3	HCH	Undifferentiated Chondrocytes from two individuals, HCH_8100808.2 and HCH_0011308.2P from knee joint	missing	cartilage	normal	M
+3	HCH0011308.2P	Undifferentiated Chondrocytes from knee joint	missing	cartilage	normal	F
+3	HCH8100808.2	Undifferentiated Chondrocytes from knee joint	missing	cartilage	normal	M
+3	HCM	cardiac myocytes	mesoderm	heart	normal	U
+3	HConF	conjunctival fibroblast	ectoderm	eye	U
+3	HCPE	choroid plexus epithelial cells	ectoderm	epithelium	normal	U
+3	HCT116	colorectal carcinoma (PMID: 7214343)	endoderm	colon	cancer	M
+3	HeartOC	Primary frozen heart tissue from NICHD donor IDs 1104 (Rep B1 DNase), 602 (Rep B2 DNase), 1442 (Rep B3 DNase), 1863 (Rep B1 FAIRE), 4548 (Rep B2 FAIRE)	heart	normal	B
+3	HeartSTL003	Standard procurement of heart tissue from a 34 year old caucasian male.	heart	normal	M
+3	HEE	esophageal epithelial cells	endoderm	epithelium	normal	U
+3	HEK293	embryonic kidney, cells contain Adenovirus 5 DNA (PMID: 11967234)	mesoderm	kidney	U
+3	HEK293T	embryonic kidney that expresses SV40 large T antigen, HEK293 (ATCC number CRL-1573) is the parental cell line	mesoderm	kidney	F
+3	HEK293TREx	embryonic kidney cells transformed with Adenovirus 5 DNA stably expressing tetracycline repressor, HEK293 (ATCC number CRL-1573) is the parental cell line, hypotriploid, XXX	mesoderm	kidney	F
+3	Hepatocytes	primary hepatocytes, liver perfused by enzymes to generate single cell suspension	endoderm	liver	normal	B
+3	HFDPC	Follicle Dermal Papilla Cells from two individuals, HFDPC_0100503.2 and HFDPC_0102703.3 from lateral scalp (brown, blond)	missing	skin	normal	F
+3	HFDPC0100503.2	Follicle Dermal Papilla Cells from lateral scalp (brown)	missing	skin	normal	F
+3	HFDPC0102703.3	Follicle Dermal Papilla Cells from lateral scalp (blond)	missing	skin	normal	F
+3	HFF	foreskin fibroblast	foreskin	normal	M
+3	HFFMyc	foreskin fibroblast cells expressing canine cMyc	fibroblast	foreskin	normal	M
+3	HFL11W	fetal liver 11 weeks, consented fetal liver samples were isolated from legally aborted fetuses at 11 weeks gestation	endoderm	liver	U
+3	HFL24W	fetal liver 24 weeks, consented fetal liver samples were isolated from legally aborted fetuses at 24 weeks gestation	endoderm	liver	U
+3	HGF	gingival fibroblasts	gingiva	normal	U
+3	HHSEC	hepatic sinusoidal endothelial cells	endoderm	liver	U
+3	HIPE	iris pigment epithelial cells	ectoderm	epithelium	normal	U
+3	HL60	promyelocytic leukemia cells, (PMID: 276884)	mesoderm	blood	cancer	F
+3	HMEC	mammary epithelial cells	ectoderm	breast	normal	U
+3	HMEpC	Mammary Epithelial Cells (placeholder, waiting on second lot/donor from PromoCell)	ectoderm	mammary gland	normal	F
+3	HMEpC6022801.3	Mammary Epithelial Cells	ectoderm	mammary gland	normal	F
+3	HMF	mammary fibroblasts	mammary	F
+3	hMNCCB	Mononuclear Cells (umbilical cord blood-single donor) from two individuals, hMNC-CB_9111701.6 and hMNC-CB_8072802.6	missing	blood	normal	B
+3	hMNCCB8072802.6	Mononuclear Cells, umbilical cord blood-single donor	missing	blood	normal	M
+3	hMNCCB9111701.6	Mononuclear Cells, umbilical cord blood-single donor	missing	blood	normal	F
+3	hMNCPB	Mononuclear Cells (peripheral blood-single donor) from two individuals, hMNC-PB_0022330.9 and hMNC-PB_0082430.9	missing	blood	normal	B
+3	hMNCPB0022330.9	Mononuclear Cells, peripheral blood-single donor	missing	blood	normal	M
+3	hMNCPB0082430.9	Mononuclear Cells, peripheral blood-single donor	missing	blood	normal	F
+3	hMSCAT	Undifferentiated Mesenchymal Stem Cells from two individuals, hMSC-AT_9061601.12 and hMSC-AT_0102604.12 from subcutaneous abdomen adipose tissue	missing	adipose	normal	F
+3	hMSCAT0102604.12	Undifferentiated Mesenchymal Stem Cells from subcutaneous abdomen adipose tissue	missing	adipose	normal	F
+3	hMSCAT9061601.12	Undifferentiated Mesenchymal Stem Cells from abdomen	missing	subcutaneous adipose tissue	normal	F
+3	hMSCBM	Undifferentiated Mesenchymal Stem Cells from two individuals, hMSC-BM_0050602.11 and hMSC-BM_0051105.11 from femoral head	missing	bone marrow	normal	B
