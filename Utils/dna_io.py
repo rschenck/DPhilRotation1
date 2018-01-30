@@ -7,7 +7,6 @@ from Utils.Utils import *
 import numpy as np
 import numpy.random as npr
 from sklearn import preprocessing
-import logging
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)).rstrip("/DataPreProcessing/"))
 from Utils.Utils import fn_timer, UpdateProgress
