@@ -71,5 +71,5 @@ python ./DataPreProcessing/CreateHDF5.py --fasta ./DataPreProcessing/Data/TestRu
 
 
 ## Data Visualizations
-Data visualizations are kept within the DataViz Directory. Please see [DataViz.md](https://github.com/rschenck/DPhilRotation1/blob/master/DataViz/DataViz.md)...
+Data visualizations are kept within the DataViz Directory. Please see data visualization [ReadMe](DataViz.md)...
 
