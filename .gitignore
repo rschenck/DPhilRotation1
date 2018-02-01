@@ -192,3 +192,8 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 
+# Other data files.
+*.rds
+*.RData
+/DataViz/Rotation1App/Data/*
+

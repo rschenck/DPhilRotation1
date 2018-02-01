@@ -7,27 +7,24 @@
 
 # Load in libraries
 library(shiny)
-library(plotly)
-library(ggplot2)
 library(shinythemes)
 
-# Load in Data
-load("VizData/GenomeLength.RData")
-
-# Define UI for random distribution app ----
 ui <- navbarPage("Rotation 1",
                  # Select Theme for page
-                 theme=shinytheme("superhero"),
+                 theme=shinytheme("yeti"),
                  
                  # App title ----
                  #titlePanel("Test"),
-                 tabPanel("PlotPage",
+                 tabPanel("Pre-processed Data",
                           # Sidebar layout with input and output definitions ----
                           sidebarLayout(
                             
                             # Sidebar panel for inputs ----
                             sidebarPanel(
                               
+                              uiOutput("chromSelect"),
+                              uiOutput("genomicPosition", inline = T),
+
                               # Input: Select the random distribution type ----
                               radioButtons("dist", "Distribution type:",
                                            c("Normal" = "norm",
@@ -52,7 +49,10 @@ ui <- navbarPage("Rotation 1",
                               
                               # Output: Tabset w/ plot, summary, and table ----
                               tabsetPanel(type = "tabs",
-                                          tabPanel("Plot", plotOutput("plot")),
+                                          tabPanel("Plot", 
+                                                   plotOutput("ideoPlot", height='100px',width="100%"),
+                                                   plotOutput("plot")
+                                                   ),
                                           tabPanel("Summary", verbatimTextOutput("summary")),
                                           tabPanel("Table", tableOutput("table"))
                               )
