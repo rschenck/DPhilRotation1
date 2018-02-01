@@ -99,6 +99,7 @@ mkdir ./DataPreProcessing/Data
 mkdir ./DataPreProcessing/Data/Genome
 mkdir ./DataPreProcessing/Data/ModelData
 mkdir ./DataPreProcessing/Data/tmp
+mkdir ./DataViz/Rotation1App/Data
 
 # Check ENCODE data
 FILES=0
