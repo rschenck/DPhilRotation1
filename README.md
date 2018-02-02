@@ -5,11 +5,11 @@ Portions of this code have been adapted from [Basset](https://github.com/davek44
 ## Dependencies
 
 1. Python >= 3.6
-   - numpy
-   - h5py
-   - pandas
-   - xlrd
-   - sklearn
+   - numpy == 1.14.0
+   - h5py == 2.7.0
+   - pandas == 0.22.0
+   - xlrd == 1.1.0
+   - scikit-learn == 0.19.1
 2. Further dependencies will be checked in Step 1.
 
 ## Preprocessing the data

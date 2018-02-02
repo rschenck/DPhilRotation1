@@ -3,7 +3,7 @@
 import sys
 import os
 from optparse import OptionParser
-from subprocess import PIPE, Popen
+
 import numpy as np
 import numpy.random as npr
 import pandas as pd
