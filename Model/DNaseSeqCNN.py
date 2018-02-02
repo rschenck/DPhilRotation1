@@ -27,8 +27,8 @@ def OptionParsing():
     usage = 'usage: %prog [options] -f <*.h5>'
     parser = OptionParser(usage)
     parser.add_option('-f', '--h5File', dest='ModelData', default=None, help="*.h5 file created using CreateHDF5.py containing the train, test, and validation data sets.")
-    parser.add_option('--opt', '--optimizer', dest='usrOpt', default='rmsprop', help="Optimizer used for training, either 'adam' or 'rmsprop'. Default='rmsprop'.")
-    parser.add_option('-m', '--momentum', dest='Momentum', default=0.98, help="Momentum value range(0,1) for optimization momentum. Default=0.98")
+    parser.add_option('--opt', '--optimizer', dest='usrOpt', default='sgd', help="Optimizer used for training, either 'adam', 'rmsprop', or 'sgd'. Default='rmsprop'.")
+    parser.add_option('-m', '--momentum', dest='Momentum', default=0.98, help="Momentum value range(0,1) for optimization momentum, only compatible with 'sgd' optimizer. Default=0.98")
     parser.add_option('-l', '--learnrate', dest='LearningRate', default=0.002, help="Learning rate range(0,1) for optimization learning rate. Default=0.002.")
     (options, args) = parser.parse_args()
     if not options.ModelData:
@@ -81,46 +81,59 @@ class ModelArch:
         self.ConvLayers = [300,200,200]
         self.ConvFilterSizes = [19,11,7]
         self.ConvPoolWidth = [3,4,4]
-        #self.HiddenUnit = [1000,1000]
+        self.HiddenUnit = [1000,1000]
         #self.HiddenDropouts = [0.3,0.3]
-        self.LearningRate = 0.002 # Optimizer Options
         #self.WeightNorm = 7 # Used to cap weight params within an epoch, not sure here...google...
+        self.LearningRate = 0.002 # Optimizer Options
         self.Momentum = 0.98 # Optimizer Options
         self.usrOpt = 'rmsprop'
-        self.CheckOptions(Options)
+        self.optConstruct = self.CheckOptions(Options)
 
     def CheckOptions(self, Options):
-        if Options.usrOptim not in ['adam','rmsprop']:
-            log.error("Unknown optimization chosen, please enter 'adam' or 'rmsprop'")
+        if Options.usrOpt not in ['adam','rmsprop', 'sgd']:
+            log.error("Unknown optimization chosen, please enter 'adam', 'sgd', or 'rmsprop'")
             sys.exit()
         else:
             self.usrOpt = Options.usrOpt
             self.LearningRate = Options.LearningRate
             self.Momentum = Options.Momentum
 
+            if self.usrOpt == 'rmsprop':
+                opt = ks.optimizers.rmsprop(lr=self.LearningRate)
+            elif self.usrOpt == 'adam':
+                opt = ks.optimizers.adam(lr=self.LearningRate)
+            elif self.usrOpt == 'sgd':
+                opt = ks.optimizers.sgd(lr=self.LearningRate, momentum=self.Momentum, nesterov=True)
+            else:
+                log.error("Unknown error.")
+            return(opt)
 
 def ConstructModelArch(Options, data, arch):
 
     # Initialize a sequential model architecture
     model = ks.Sequential()
+
+    # Convolution Layers, normalizations, activations, and pooling
     for i, val in enumerate(arch.ConvFilterSizes):
         if i==0:
-            model.add(ks.layers.Conv1D(filters=arch.ConvLayers[i],kernel_size=arch.ConvFilterSizes[i],activation="relu",input_shape=(600,4), padding="same"))
-            model.add(ks.layers.MaxPool1D(pool_size=arch.ConvPoolWidth[i]))
+            model.add(ks.layers.Conv1D(filters=arch.ConvLayers[i],kernel_size=arch.ConvFilterSizes[i],input_shape=(600,4), padding="same"))
         else:
-            model.add(ks.layers.Conv1D(filters=arch.ConvLayers[i], kernel_size=arch.ConvFilterSizes[i], activation="relu", padding="same"))
-            model.add(ks.layers.MaxPool1D(pool_size=arch.ConvPoolWidth[i]))
+            model.add(ks.layers.Conv1D(filters=arch.ConvLayers[i], kernel_size=arch.ConvFilterSizes[i], padding="same"))
+        model.add(ks.layers.BatchNormalization(axis=1))
+        model.add(ks.layers.Activation('relu'))
+        model.add(ks.layers.MaxPool1D(pool_size=arch.ConvPoolWidth[i]))
 
+    #print(model.output_shape)
+    #model.add(ks.layers.Flatten())
+    #rint(model.output_shape)
+    #sys.exit()
+    for i, val in enumerate(arch.HiddenUnit):
+        model.add(ks.layers.Dense(arch.HiddenUnit[i]))
+        model.add(ks.layers.Activation('relu'))
+        model.add(ks.layers.Dropout())
+    sys.exit()
     # Compile the model
-    # TODO implement options for optimizer using learning rate and momentum
-    # Optimizer options
-    if arch.usrOpt == 'adam':
-        pass
-    elif arch.usrOpt == 'rmsprop':
-        pass
-    model.compile(optimizer='adam',
-                  loss='binary_crossentropy',
-                  metrics=['accuracy'])
+    model.compile(optimizer=arch.optConstruct, loss='binary_crossentropy',metrics=['accuracy'])
 
 if __name__=="__main__":
     # Setup Primary Variables
@@ -129,6 +142,6 @@ if __name__=="__main__":
 
     # Get Data and ModelArch (Model Architecture Class)
     data = Data(Options)
-    archOptions = ModelArch()
+    archOptions = ModelArch(Options)
 
     ConstructModelArch(Options, data, archOptions)
