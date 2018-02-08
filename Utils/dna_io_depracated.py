@@ -166,7 +166,9 @@ def dna_one_hot(seq, seq_len=None, flatten=True):
 
     # flatten and make a column vector 1 x len(seq)
     if flatten:
-        seq_vec = seq_code.flatten()[None,:]
+       seq_vec = seq_code.flatten()[None,:]
+
+    # print(seq_code.transpose()) # Gets and individual sequence into the proper shape
 
     return seq_vec
 
@@ -296,7 +298,7 @@ def hash_sequences_1hot(fasta_file, extend_len=None):
     if seq:
         seq_vecs[header] = dna_one_hot(seq, seq_len)
 
-    return (seq_vecs, n)
+    return (seq_vecs, n, seq_len)
 
 ################################################################################
 # load_data_1hot
@@ -312,7 +314,7 @@ def hash_sequences_1hot(fasta_file, extend_len=None):
 @fn_timer
 def load_data_1hot(fasta_file, scores_file, extend_len=None, mean_norm=True, whiten=False, permute=True, sort=False):
     # load sequences
-    seq_vecs, n = hash_sequences_1hot(fasta_file, extend_len) # Implemented Timer and Update functions
+    seq_vecs, n, seq_length = hash_sequences_1hot(fasta_file, extend_len) # Implemented Timer and Update functions
 
     # load scores
     seq_scores = hash_scores(scores_file)
@@ -332,7 +334,7 @@ def load_data_1hot(fasta_file, scores_file, extend_len=None, mean_norm=True, whi
         train_seqs = train_seqs[order]
         train_scores = train_scores[order]
 
-    return train_seqs, train_scores, n
+    return train_seqs, train_scores, n, seq_length
 
 
 ################################################################################

@@ -11,7 +11,7 @@ import h5py
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)).rstrip("/DataPreProcessing/"))
 from Utils.Utils import fn_timer, UpdateProgress
-from Utils.dna_io import load_data_1hot
+from Utils.dna_io_keras import load_data_1hot
 
 def OptionParsing():
     usage = 'usage: %prog [options] -f <fasta_file> -t <targets_file> -o <out_file>'
@@ -44,19 +44,22 @@ def batch_round(count, batch_size):
 
 @fn_timer
 def LoadData(Options):
-    df_add = ''
     print("INFO: Loading in sequences and targets as hot sequence...", file=sys.stdout)
-    seqs, targets, n = load_data_1hot(Options.fasta_file, Options.targets_file, extend_len=Options.extend_length, mean_norm=False, whiten=False, permute=False, sort=False)
+    df_add = ''
+    seqs, targets, n, seq_len = load_data_1hot(Options.fasta_file, Options.targets_file, extend_len=Options.extend_length, mean_norm=False, whiten=False, permute=False, sort=False)
 
-    print("INFO: Sequence array shape...")
+    np.set_printoptions(threshold=np.inf)
+    print("INFO: Sequence array shape:", file=sys.stdout)
+    print(seqs.shape, file=sys.stdout)
+    print("INFO: Reshaping sequence array...", file=sys.stdout)
+
+    # reshape sequences for keras
+    # When stack gets returned reshape arguments = (count of seqs, seq length, 4 bases)
+    seqs = seqs.reshape(seqs.shape[0],seq_len,4)
+
+    print("INFO: New sequence array shape:")
     print(seqs.shape)
-    print(seqs)
-    print("INFO: Reshaping sequence array...")
-    # reshape sequences for torch
-    seqs = seqs.reshape((seqs.shape[0],4,1,int(seqs.shape[1]/4)))
-    print("INFO: Sequence array shape...")
-    print(seqs.shape)
-    print(seqs)
+    # print(seqs[0])
 
     # read headers
     print("INFO: Reading headers of fasta file...", file=sys.stdout)
@@ -206,6 +209,4 @@ def main():
 
 
 if __name__=="__main__":
-
-
     main()

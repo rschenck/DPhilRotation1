@@ -30,6 +30,8 @@ def OptionParsing():
     parser.add_option('--opt', '--optimizer', dest='usrOpt', default='sgd', help="Optimizer used for training, either 'adam', 'rmsprop', or 'sgd'. Default='rmsprop'.")
     parser.add_option('-m', '--momentum', dest='Momentum', default=0.98, help="Momentum value range(0,1) for optimization momentum, only compatible with 'sgd' optimizer. Default=0.98")
     parser.add_option('-l', '--learnrate', dest='LearningRate', default=0.002, help="Learning rate range(0,1) for optimization learning rate. Default=0.002.")
+    parser.add_option('-b', '--batchsize', dest='BatchSize', default=128, help="Batch size for model training. Default=128.")
+    parser.add_option('-e', '--epochs', dest="epochs", default=100, help="Epochs for training the model. Default=100.")
     (options, args) = parser.parse_args()
     if not options.ModelData:
         parser.error('ERROR: Must provide a *.h5 file with train, test, and validation data.')
@@ -37,9 +39,12 @@ def OptionParsing():
 
 class Data:
     '''
-    Holds all the hdf5 file data.
+    Holds all the hdf5 file data. This includes all training, validation, and testing datasets.
     '''
     def __init__(self, Options):
+        '''
+        :param Options: Parser object, holds all user options including the ModelData.
+        '''
         self.dataFile = Options.ModelData
         self.target_labels = None
         self.train_seqs = None
@@ -71,23 +76,34 @@ class Data:
 
         usrData.close()
         log.info("Data Loaded")
-        log.info("Input Data Shape: (%s,%s)" % (self.test_seqs.shape[3], self.test_seqs.shape[1]))
+        log.info("Train Data Shape:")
+        log.info(self.train_seqs.shape)
 
 class ModelArch:
     '''
     Model Architecture Information
     '''
     def __init__(self, Options):
+        # Convolution options
         self.ConvLayers = [300,200,200]
         self.ConvFilterSizes = [19,11,7]
         self.ConvPoolWidth = [3,4,4]
+
+        # Dense layer options
         self.HiddenUnit = [1000,1000]
-        #self.HiddenDropouts = [0.3,0.3]
+        self.HiddenDropouts = [0.3,0.3]
+        self.OutputLayer = 3 # Total number of cells (Normally 164)
+
         #self.WeightNorm = 7 # Used to cap weight params within an epoch, not sure here...google...
+
+        # Optimization parameters
         self.LearningRate = 0.002 # Optimizer Options
         self.Momentum = 0.98 # Optimizer Options
         self.usrOpt = 'rmsprop'
+
+        # Construct model and optimizer
         self.optConstruct = self.CheckOptions(Options)
+        self.Model = self.ConstructModelArch(Options)
 
     def CheckOptions(self, Options):
         if Options.usrOpt not in ['adam','rmsprop', 'sgd']:
@@ -108,32 +124,43 @@ class ModelArch:
                 log.error("Unknown error.")
             return(opt)
 
-def ConstructModelArch(Options, data, arch):
+    def ConstructModelArch(self, Options):
 
-    # Initialize a sequential model architecture
-    model = ks.Sequential()
+        # Initialize a sequential model architecture
+        model = ks.Sequential()
 
-    # Convolution Layers, normalizations, activations, and pooling
-    for i, val in enumerate(arch.ConvFilterSizes):
-        if i==0:
-            model.add(ks.layers.Conv1D(filters=arch.ConvLayers[i],kernel_size=arch.ConvFilterSizes[i],input_shape=(600,4), padding="same"))
-        else:
-            model.add(ks.layers.Conv1D(filters=arch.ConvLayers[i], kernel_size=arch.ConvFilterSizes[i], padding="same"))
-        model.add(ks.layers.BatchNormalization(axis=1))
-        model.add(ks.layers.Activation('relu'))
-        model.add(ks.layers.MaxPool1D(pool_size=arch.ConvPoolWidth[i]))
+        # Convolution Layers, normalizations, activations, and pooling
+        for i, val in enumerate(self.ConvFilterSizes):
+            if i==0:
+                model.add(ks.layers.Conv1D(filters=self.ConvLayers[i],kernel_size=self.ConvFilterSizes[i],input_shape=(600,4), padding="same"))
+            else:
+                model.add(ks.layers.Conv1D(filters=self.ConvLayers[i], kernel_size=self.ConvFilterSizes[i], padding="same"))
+            model.add(ks.layers.BatchNormalization(axis=1))
+            model.add(ks.layers.Activation('relu'))
+            model.add(ks.layers.MaxPool1D(pool_size=self.ConvPoolWidth[i]))
 
-    #print(model.output_shape)
-    #model.add(ks.layers.Flatten())
-    #rint(model.output_shape)
-    #sys.exit()
-    for i, val in enumerate(arch.HiddenUnit):
-        model.add(ks.layers.Dense(arch.HiddenUnit[i]))
-        model.add(ks.layers.Activation('relu'))
-        model.add(ks.layers.Dropout())
-    sys.exit()
-    # Compile the model
-    model.compile(optimizer=arch.optConstruct, loss='binary_crossentropy',metrics=['accuracy'])
+        model.add(ks.layers.Flatten())
+
+        for i, val in enumerate(self.HiddenUnit):
+            model.add(ks.layers.Dense(self.HiddenUnit[i]))
+            model.add(ks.layers.Activation('relu'))
+            model.add(ks.layers.Dropout(self.HiddenDropouts[i]))
+
+        model.add(ks.layers.Dense(self.OutputLayer, input_shape=(None,12,3)))
+        model.add(ks.layers.Activation('sigmoid'))
+
+        # Compile the model
+        model.compile(optimizer=self.optConstruct, loss='binary_crossentropy',metrics=['accuracy'])
+
+        return(model)
+
+def TrainModel(Options, model, data):
+    model.Model.fit(x=data.train_seqs, y=data.train_targets,
+              batch_size=Options.BatchSize,
+              epochs=Options.epochs,
+              verbose=1,
+              # steps_per_epoch=Options.BatchSize,
+              validation_data=(data.test_seqs, data.test_targets))
 
 if __name__=="__main__":
     # Setup Primary Variables
@@ -142,6 +169,26 @@ if __name__=="__main__":
 
     # Get Data and ModelArch (Model Architecture Class)
     data = Data(Options)
-    archOptions = ModelArch(Options)
 
-    ConstructModelArch(Options, data, archOptions)
+    # Check data fromats
+    print("Train Label Shape", data.train_targets.shape)
+    print("Labels Format:")
+    print(data.train_targets[0:4])
+    print("Train Seq Shape", data.train_seqs.shape)
+    print("Seq Format (first 10 bp):")
+    print(data.train_seqs[0])
+    # print(data.test_seqs)
+
+    # sys.exit()
+
+    #print(data.test_targets)
+    # sys.exit("Evaluating Data.")
+    model = ModelArch(Options)
+
+    # Print out the model summary.
+    model.Model.summary()
+
+    TrainModel(Options, model, data)
+
+
+
