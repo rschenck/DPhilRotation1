@@ -176,7 +176,7 @@ def TrainModel(Options, model, data):
                     verbose=1,
                     # steps_per_epoch=Options.BatchSize,
                     validation_data=(data.test_seqs, data.test_targets),
-                    callbacks=[csv_logger, ks.callbacks.TensorBoard(log_dir='./logs', batch_size=Options.BatchSize, write_graph=True)])
+                    callbacks=[csv_logger, ks.callbacks.TensorBoard(log_dir='./logs')])
 
     try:
         logging.info("Attempting to dump history pickle.")
