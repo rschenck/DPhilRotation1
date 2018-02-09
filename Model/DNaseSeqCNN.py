@@ -211,8 +211,10 @@ if __name__=="__main__":
 
     # Get Data and ModelArch (Model Architecture Class)
     data = Data(Options)
+    logging.info("Data loaded.")
 
     model = ModelArch(Options, data)
+    logging.info("Model architecture compiled.")
 
     model, csv_logger = TrainModel(Options, model, data)
 
