@@ -196,4 +196,6 @@ vignettes/*.pdf
 *.rds
 *.RData
 /DataViz/Rotation1App/Data/*
-
+*.log.txt
+*.ModelArch.txt
+/Model/logs/*
