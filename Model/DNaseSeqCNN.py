@@ -133,7 +133,7 @@ class ModelArch:
     def ConstructModelArch(self, Options):
 
         # Initialize a sequential model architecture
-        model = ks.Sequential()
+        model = ks.models.Sequential()
 
         # Convolution Layers, normalizations, activations, and pooling
         for i, val in enumerate(self.ConvFilterSizes):
