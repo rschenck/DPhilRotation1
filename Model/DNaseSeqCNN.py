@@ -22,7 +22,7 @@ def OptionParsing():
     parser.add_option('-f', '--h5File', dest='ModelData', default=None, help="*.h5 file created using CreateHDF5.py containing the train, test, and validation data sets.")
     parser.add_option('-r', '--runname', dest="RunName", default="Run0", type=str, help="Name of run. Default 'Run0'")
     parser.add_option('--out', '--outputdir', dest="outputdir", default=None, help="Directory for any outputs")
-    parser.add_option('--opt', '--optimizer', dest='usrOpt', default='adam', help="Optimizer used for training, either 'adam', 'rmsprop', or 'sgd'. Default='rmsprop'.")
+    parser.add_option('--opt', '--optimizer', dest='usrOpt', default='adam', help="Optimizer used for training, either 'adam', 'rmsprop', or 'sgd'. Default='adam'.")
     parser.add_option('-m', '--momentum', dest='Momentum', default=0.98, type=float, help="Momentum value range(0,1) for optimization momentum, only compatible with 'sgd' optimizer. Default=0.98")
     parser.add_option('-l', '--learnrate', dest='LearningRate', default=0.002, type=float, help="Learning rate range(0,1) for optimization learning rate. Default=0.002.")
     parser.add_option('-b', '--batchsize', dest='BatchSize', default=128, type=int, help="Batch size for model training. Default=128.")
@@ -99,8 +99,7 @@ class ModelArch:
         self.HiddenUnit = Options.hiddenunits
         self.HiddenDropouts = Options.drops
         self.OutputLayer = data.train_targets.shape[1] # Total number of cells (Normally 164)
-
-        #self.WeightNorm = 7 # Used to cap weight params within an epoch, not sure here...google...
+        self.WeightNorm = 7 # Used to cap weight params within an epoch, not sure here...clipvalue?...
 
         # Optimization parameters
         self.LearningRate = Options.LearningRate # Optimizer Options
@@ -125,7 +124,7 @@ class ModelArch:
             elif self.usrOpt == 'adam':
                 opt = ks.optimizers.adam(lr=self.LearningRate)
             elif self.usrOpt == 'sgd':
-                opt = ks.optimizers.sgd(lr=self.LearningRate, momentum=self.Momentum, nesterov=True)
+                opt = ks.optimizers.sgd(lr=self.LearningRate, momentum=self.Momentum, clipvalue=self.WeightNorm,nesterov=True)
             else:
                 logging.WARNING("Unknown error.")
             return(opt)
@@ -176,7 +175,7 @@ def TrainModel(Options, model, data):
                     verbose=1,
                     # steps_per_epoch=Options.BatchSize,
                     validation_data=(data.test_seqs, data.test_targets),
-                    callbacks=[csv_logger, ks.callbacks.TensorBoard(log_dir='./logs')])
+                    callbacks=[csv_logger, ks.callbacks.TensorBoard(log_dir='./logs%s'%(Options.RunName))])
 
     try:
         logging.info("Attempting to dump history pickle.")

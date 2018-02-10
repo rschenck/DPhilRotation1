@@ -199,3 +199,4 @@ vignettes/*.pdf
 *.log.txt
 *.ModelArch.txt
 /Model/logs/*
+/Model/*.csv
