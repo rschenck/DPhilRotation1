@@ -159,6 +159,25 @@ class ModelArch:
 
         return(model)
 
+def GetCallbackList(Options, TrainSummaries):
+    try:
+        os.mkdir('./logs%s'%(Options.RunName))
+    except:
+        logging.info("Unable to create logs directory")
+    try:
+        os.mkdir('./Checkpoints.%'%(Options.RunName))
+    except:
+        logging.info("Unable to create Checkpoints directory")
+
+    csv_logger = CSVLogger(TrainSummaries, append=True, separator=';')
+    tensb = ks.callbacks.TensorBoard(log_dir='./logs%s' % (Options.RunName), histogram_freq=1, write_graph=True, write_grads=True, batch_size=Options.BatchSize, write_images=True, embeddings_freq=1)
+    checkpointer = ks.callbacks.ModelCheckpoint('./Checkpoints.%'%(Options.RunName), save_weights_only=False, period=1)
+    earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=3, verbose=0, mode='auto')
+
+    callbackList = [csv_logger, tensb, checkpointer, earlystopper]
+
+    return(callbackList)
+
 def TrainModel(Options, model, data):
     if Options.outputdir is not None:
         TrainSummaries = Options.outputdir + Options.RunName + "trainlog.csv"
@@ -167,15 +186,13 @@ def TrainModel(Options, model, data):
         TrainSummaries = Options.RunName + "trainlog.csv"
         historypickle = Options.RunName + "trainhistory.p"
 
-    csv_logger = CSVLogger(TrainSummaries, append=True, separator=';')
-
     history = model.Model.fit(x=data.train_seqs, y=data.train_targets,
                     batch_size=Options.BatchSize,
                     epochs=Options.epochs,
                     verbose=1,
                     # steps_per_epoch=Options.BatchSize,
                     validation_data=(data.test_seqs, data.test_targets),
-                    callbacks=[csv_logger, ks.callbacks.TensorBoard(log_dir='./logs%s'%(Options.RunName))])
+                    callbacks=GetCallbackList(TrainSummaries, Options))
 
     try:
         logging.info("Attempting to dump history pickle.")

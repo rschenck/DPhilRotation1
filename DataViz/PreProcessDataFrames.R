@@ -9,6 +9,8 @@ library(GenomicRanges)
 library(gtools)
 library(Sushi)
 library(karyoploteR)
+library(reshape2)
+library(plotly)
 
 #---Parse commands and set working path---#
 initial.options <- commandArgs(trailingOnly = FALSE)
@@ -17,11 +19,35 @@ filePath <- dirname(sub(file.arg.name, "", initial.options[grep(file.arg.name, i
 setwd(filePath)
 # Should now be within the DataViz dir
 
+#=================~~~~~Pre-Processed Data~~~~~~=====================#
+
+
+
+#=================~~~~~Processed Data~~~~~~=====================#
 df <- read.csv("/Users/schencro/Desktop/Oxford/Rotation_1/CNN/DataPreProcessing/Data/TestRun.29Jan2018.1100_act.txt", header=TRUE, sep="\t",stringsAsFactors = F)
 #df <- read.csv("../DataPreProcessing/Data/TestRun.29Jan2018.1100_act.txt", sep="\t", header=TRUE, stringsAsFactors = FALSE)
 dfcolnam <- c("Pos","8988T","AoSMC","Chorion","CLL","Fibrobl","FibroP","Gliobla","GM12891","GM12892","GM18507","GM19238","GM19239","GM19240","H9ES","HeLa-S3_IFNa4h","Hepatocytes","HPDE6-E6E7","HSMM_emb","HTR8svn","Huh-7.5Huh-7","iPS","Ishikawa_Estradiol","Ishikawa_4OHTAM","LNCaP_androgen","MCF-7_Hypoxia","Medullo","Melano","Myometr","Osteobl","PanIsletD","PanIslets","pHTE","ProgFib","RWPE1","Stellate","T-47D","CD4_Th0","Urothelia","Urothelia_UT189","AG04449","AG04450","AG09309","AG09319","AG10803","AoAF","BE2_C","BJ","Caco-2","CD20+","CD34+","CMK","GM06990","GM12864","GM12865","H7-hESC","HAc","HAEpiC","HA-h","HA-sp","HBMEC","HCF","HCFaa","HCM","HConF","HCPEpiC","HCT-116","HEEpiC","HFF","HFF-Myc","HGF","HIPEpiC","HL-60","HMF","HMVEC-dAd","HMVEC-dBl-Ad","HMVEC-dBl-Neo","HMVEC-dLy-Ad","HMVEC-dLy-Neo","HMVEC-dNeo","HMVEC-LBl","HMVEC-LLy","HNPCEpiC","HPAEC","HPAF","HPdLF","HPF","HRCEpiC","HRE","HRGEC","HRPEpiC","HVMF","Jurkat","Monocytes-CD14+","NB4","NH-A","NHDF-Ad","NHDF-neo","NHLF","NT2-D1","PANC-1","PrEC","RPTEC","SAEC","SKMC","SK-N-MC","SK-N-SH_RA","Th2","WERI-Rb-1","WI-38","WI-38_4OHTAM","A549","GM12878","H1-hESC","HeLa-S3","HepG2","HMEC","HSMM","HSMMtube","HUVEC","K562","LNCaP","MCF-7","NHEK","Th1","LNG.IMR90","ESC.H9","ESC.H1","IPSC.DF.6.9","IPSC.DF.19.11","ESDR.H1.NEUR.PROG","ESDR.H1.BMP4.MESO","ESDR.H1.BMP4.TROP","ESDR.H1.MSC","BLD.CD3.PPC","BLD.CD3.CPC","BLD.CD14.PC","BLD.MOB.CD34.PC.M","BLD.MOB.CD34.PC.F","BLD.CD19.PPC","BLD.CD56.PC","SKIN.PEN.FRSK.FIB.01","SKIN.PEN.FRSK.FIB.02","SKIN.PEN.FRSK.MEL.01","SKIN.PEN.FRSK.KER.02","BRST.HMEC.35","THYM.FET","BRN.FET.F","BRN.FET.M","MUS.PSOAS","MUS.TRNK.FET","MUS.LEG.FET","HRT.FET","GI.STMC.FET","GI.S.INT.FET","GI.L.INT.FET","GI.S.INT","GI.STMC.GAST","KID.FET","LNG.FET","OVRY","ADRL.GLND.FET","PLCNT.FET","PANC")
 dfcolnam2 <- c("chr","start","end","8988T","AoSMC","Chorion","CLL","Fibrobl","FibroP","Gliobla","GM12891","GM12892","GM18507","GM19238","GM19239","GM19240","H9ES","HeLa-S3_IFNa4h","Hepatocytes","HPDE6-E6E7","HSMM_emb","HTR8svn","Huh-7.5Huh-7","iPS","Ishikawa_Estradiol","Ishikawa_4OHTAM","LNCaP_androgen","MCF-7_Hypoxia","Medullo","Melano","Myometr","Osteobl","PanIsletD","PanIslets","pHTE","ProgFib","RWPE1","Stellate","T-47D","CD4_Th0","Urothelia","Urothelia_UT189","AG04449","AG04450","AG09309","AG09319","AG10803","AoAF","BE2_C","BJ","Caco-2","CD20+","CD34+","CMK","GM06990","GM12864","GM12865","H7-hESC","HAc","HAEpiC","HA-h","HA-sp","HBMEC","HCF","HCFaa","HCM","HConF","HCPEpiC","HCT-116","HEEpiC","HFF","HFF-Myc","HGF","HIPEpiC","HL-60","HMF","HMVEC-dAd","HMVEC-dBl-Ad","HMVEC-dBl-Neo","HMVEC-dLy-Ad","HMVEC-dLy-Neo","HMVEC-dNeo","HMVEC-LBl","HMVEC-LLy","HNPCEpiC","HPAEC","HPAF","HPdLF","HPF","HRCEpiC","HRE","HRGEC","HRPEpiC","HVMF","Jurkat","Monocytes-CD14+","NB4","NH-A","NHDF-Ad","NHDF-neo","NHLF","NT2-D1","PANC-1","PrEC","RPTEC","SAEC","SKMC","SK-N-MC","SK-N-SH_RA","Th2","WERI-Rb-1","WI-38","WI-38_4OHTAM","A549","GM12878","H1-hESC","HeLa-S3","HepG2","HMEC","HSMM","HSMMtube","HUVEC","K562","LNCaP","MCF-7","NHEK","Th1","LNG.IMR90","ESC.H9","ESC.H1","IPSC.DF.6.9","IPSC.DF.19.11","ESDR.H1.NEUR.PROG","ESDR.H1.BMP4.MESO","ESDR.H1.BMP4.TROP","ESDR.H1.MSC","BLD.CD3.PPC","BLD.CD3.CPC","BLD.CD14.PC","BLD.MOB.CD34.PC.M","BLD.MOB.CD34.PC.F","BLD.CD19.PPC","BLD.CD56.PC","SKIN.PEN.FRSK.FIB.01","SKIN.PEN.FRSK.FIB.02","SKIN.PEN.FRSK.MEL.01","SKIN.PEN.FRSK.KER.02","BRST.HMEC.35","THYM.FET","BRN.FET.F","BRN.FET.M","MUS.PSOAS","MUS.TRNK.FET","MUS.LEG.FET","HRT.FET","GI.STMC.FET","GI.S.INT.FET","GI.L.INT.FET","GI.S.INT","GI.STMC.GAST","KID.FET","LNG.FET","OVRY","ADRL.GLND.FET","PLCNT.FET","PANC")
 colnames(df) <- dfcolnam
+
+####### HeatMap of activity tables #######
+matrixify<-function(x) {
+  m<-as.matrix(x[,-1])
+  rownames(m)<-x[,1]
+  m
+}
+# [rows , columns]
+z = matrixify(df)
+p <- plot_ly(z = z, type = "heatmap")
+p
+p <- plot_ly(
+  x = colnames(z), y = c("d", "e", "f"),
+  z = m, type = "heatmap"
+)
+
+
+####### End HeatMap of activity tables #######
+
 cols <- seq(2,length(dfcolnam),1)
 df[,cols] <- apply(df[,cols], 2, function(x) as.numeric(x))
 df[,1] <- sapply(df[,1], function(x) sub("\\(\\+\\)","",x))
@@ -126,3 +152,31 @@ kpAddBaseNumbers(kp)
 kpPlotRegions(kp, data=GRanges("chr1:100-16540358"), col='red', r0=1, 
               layer.margin=0)
 kpBars(kp, data=GRanges(dfRowSums), y1=dfRowSums$Overall.Value)
+
+
+
+
+#=================~~~~~Model Training Data~~~~~~=====================#
+library(reshape2)
+library(ggplot2)
+library(gridExtra)
+
+trainData <- read.csv("~/Desktop/Epochs.txt", sep=";", header=TRUE)
+
+trainData <- melt(trainData, id.vars=c("epoch","Run"))
+loss <- trainData[grepl('Loss', trainData$variable),]
+colnames(loss) <- c("Epoch","Run","Dataset","Metric")
+acc <- trainData[grepl('Acc', trainData$variable),]
+colnames(acc) <- c("Epoch","Run","Dataset","Metric")
+
+p1 <- ggplot(data=loss, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
+  scale_color_brewer(palette="Set2")
+p1 <- p1 + xlab("Epoch") + ylab("Loss") + scale_x_continuous(breaks = seq(0,100,5)) + theme_light()
+p1
+
+p2 <-  ggplot(data=acc, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
+  scale_color_brewer(palette="Set2")
+p2 <- p2 + xlab("Epoch") + ylab("Accuracy") + scale_x_continuous(breaks = seq(0,100,5)) + theme_light()
+p2
+
+g <- grid.arrange(p1,p2, top="")
