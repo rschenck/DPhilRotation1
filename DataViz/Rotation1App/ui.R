@@ -23,24 +23,24 @@ ui <- navbarPage("Rotation 1",
                             sidebarPanel(
                               
                               uiOutput("chromSelect"),
-                              uiOutput("genomicPosition", inline = T),
+                              uiOutput("genomicPosition", inline = T)
 
                               # Input: Select the random distribution type ----
-                              radioButtons("dist", "Distribution type:",
-                                           c("Normal" = "norm",
-                                             "Uniform" = "unif",
-                                             "Log-normal" = "lnorm",
-                                             "Exponential" = "exp")),
+                              #radioButtons("dist", "Distribution type:",
+                              #             c("Normal" = "norm",
+                              #               "Uniform" = "unif",
+                              #               "Log-normal" = "lnorm",
+                              #               "Exponential" = "exp")),
                               
                               # br() element to introduce extra vertical spacing ----
-                              br(),
+                              #br(),
                               
                               # Input: Slider for the number of observations to generate ----
-                              sliderInput("n",
-                                          "Number of observations:",
-                                          value = 500,
-                                          min = 1,
-                                          max = 1000)
+                              #sliderInput("n",
+                              #            "Number of observations:",
+                              #            value = 500,
+                              #            min = 1,
+                              #            max = 1000)
                               
                             ),
                             
@@ -69,6 +69,7 @@ ui <- navbarPage("Rotation 1",
                                       padding: 0px;"
                           )
                           ),
-                 tabPanel("Another"),
-                 tabPanel("About")
+                 tabPanel("Processed-Data"),
+                 tabPanel("Model Training"),
+                 tabPanel("Mutagenesis")
                           )

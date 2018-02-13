@@ -10,22 +10,20 @@ library(ggplot2)
 library(GenomicRanges)
 library(circlize)
 library(karyoploteR)
+library(dplyr)
 
 # Load in Data
-load('GenomeLength.RData')
+load('Data/GenomeLength.RData')
 #dfTotal <- readRDS('ProcessedBedFile.rds')
-dfRowSums <- readRDS('SummaryBedFile.rds')
+dfRowSums <- readRDS('Data/SummaryBedFile.rds')
 
 shinyServer(function(input, output, session) {
+  #=================~~~~~Pre-Processed Data~~~~~=====================#
   
-  #totalData <- reactive({
-  #    data <- dfTotal %>% filter(
-  #      chr == input$chrom &
-  #      start >= input$gpos[1] &
-  #      end <= input$gpos[2]
-  #  )
-  #})
   
+  
+  
+  #=================~~~~~Processed Data~~~~~~=====================#
   summaryData <- reactive({
       data <- dfRowSums %>% filter(
               chr == input$chrom &
@@ -61,28 +59,23 @@ shinyServer(function(input, output, session) {
     kpBars(kp, data=GRanges(toPlot), y1=toPlot$Overall.Value, ymin=1, ymax=max(toPlot$Overall.Value))
   })
   
-  # Reactive expression to generate the requested distribution ----
-  # This is called whenever the inputs change. The output functions
-  # defined below then use the value computed from this expression
-  d <- reactive({
-    dist <- switch(input$dist,
-                   norm = rnorm,
-                   unif = runif,
-                   lnorm = rlnorm,
-                   exp = rexp,
-                   rnorm)
-    
-    dist(input$n)
-  })
-  
   # Generate a summary of the data ----
   output$summary <- renderPrint({
-    summary(data())
+    #summary(data())
   })
   
   # Generate an HTML table view of the data ----
   output$table <- renderTable({
-    data()
+    #data()
   })
+  
+  #=================~~~~~Model Training Data~~~~~~=====================#
+  
+  
+  
+  #=================~~~~~Model Results Data~~~~~~=====================#
+  
+  
+  
   
 })
