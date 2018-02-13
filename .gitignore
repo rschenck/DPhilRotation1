@@ -201,3 +201,5 @@ vignettes/*.pdf
 /Model/logs/*
 /Model/*.csv
 *.p
+/Model/Checkpoints.*
+/Model/logs.*

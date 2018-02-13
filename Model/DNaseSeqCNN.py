@@ -159,7 +159,7 @@ class ModelArch:
 
         return(model)
 
-def GetCallbackList(Options, TrainSummaries):
+def myCallBackList(Options, TrainSummaries):
     try:
         os.mkdir('./logs.%s'%(Options.RunName))
     except:
@@ -170,8 +170,8 @@ def GetCallbackList(Options, TrainSummaries):
         logging.info("Unable to create Checkpoints directory")
 
     csv_logger = CSVLogger(TrainSummaries, append=True, separator=';')
-    tensb = ks.callbacks.TensorBoard(log_dir='./logs.%s'%(Options.RunName), histogram_freq=1, write_graph=True, write_grads=True, batch_size=Options.BatchSize, write_images=True, embeddings_freq=1)
-    checkpointer = ks.callbacks.ModelCheckpoint('./Checkpoints.%s'%(Options.RunName), save_weights_only=False, period=1)
+    tensb = ks.callbacks.TensorBoard(log_dir=('./logs.'+ Options.RunName), histogram_freq=1, write_graph=True, write_grads=True, batch_size=Options.BatchSize, write_images=True, embeddings_freq=1)
+    checkpointer = ks.callbacks.ModelCheckpoint(filepath=('./Checkpoints.' + Options.RunName), save_weights_only=False, period=1)
     earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=3, verbose=0, mode='auto')
 
     callbackList = [csv_logger, tensb, checkpointer, earlystopper]
@@ -180,11 +180,13 @@ def GetCallbackList(Options, TrainSummaries):
 
 def TrainModel(Options, model, data):
     if Options.outputdir is not None:
-        TrainSummaries = Options.outputdir + Options.RunName + "trainlog.csv"
-        historypickle = Options.outputdir + Options.RunName + "trainhistory.p"
+        TrainSummaries = Options.outputdir + Options.RunName + ".trainlog.csv"
+        historypickle = Options.outputdir + Options.RunName + ".trainhistory.p"
     else:
-        TrainSummaries = Options.RunName + "trainlog.csv"
-        historypickle = Options.RunName + "trainhistory.p"
+        TrainSummaries = Options.RunName + ".trainlog.csv"
+        historypickle = Options.RunName + ".trainhistory.p"
+
+    callbacklist = myCallBackList(Options, TrainSummaries)
 
     history = model.Model.fit(x=data.train_seqs, y=data.train_targets,
                     batch_size=Options.BatchSize,
@@ -192,7 +194,7 @@ def TrainModel(Options, model, data):
                     verbose=1,
                     # steps_per_epoch=Options.BatchSize,
                     validation_data=(data.test_seqs, data.test_targets),
-                    callbacks=GetCallbackList(TrainSummaries, Options))
+                    callbacks=callbacklist)
 
     try:
         logging.info("Attempting to dump history pickle.")
@@ -205,13 +207,15 @@ def TrainModel(Options, model, data):
     return(model, csv_logger)
 
 def EvaluateModel(Options, model, data):
-    Evaluation = model.evaluate(data.valid_seqs, data.valid_targets, verbose=1, batch_size=Options.BatchSize)
+
+    Evaluation = model.Model.evaluate(data.valid_seqs, data.valid_targets, verbose=1, batch_size=Options.BatchSize)
 
     return(Evaluation)
 
 if __name__=="__main__":
     # Setup Primary Variables
     FilePath = os.path.dirname(os.path.abspath(__file__))
+
     (Options, Parser) = OptionParsing()
 
     logging.basicConfig(filename="%s.log.txt" % (Options.RunName), level=logging.INFO)
@@ -227,6 +231,7 @@ if __name__=="__main__":
 
     # Get Data and ModelArch (Model Architecture Class)
     data = Data(Options)
+
     logging.info("Data loaded.")
 
     model = ModelArch(Options, data)
