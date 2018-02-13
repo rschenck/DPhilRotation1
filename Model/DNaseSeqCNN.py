@@ -177,7 +177,7 @@ def TrainModel(Options, model, data):
         logging.info("Unable to create Checkpoints directory")
 
     csv_logger = CSVLogger(TrainSummaries, append=True, separator=';')
-    tensb = ks.callbacks.TensorBoard(log_dir=('./logs.'+ Options.RunName), histogram_freq=1, write_graph=True, batch_size=Options.BatchSize, write_images=True)
+    tensb = ks.callbacks.TensorBoard(log_dir=('./logs.'+ Options.RunName), histogram_freq=1, write_graph=True, write_images=True)
     checkpointer = ks.callbacks.ModelCheckpoint(filepath=('./Checkpoints.' + Options.RunName), save_weights_only=False, period=1)
     earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=3, verbose=0, mode='auto')
 
