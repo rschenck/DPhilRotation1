@@ -165,13 +165,13 @@ def GetCallbackList(Options, TrainSummaries):
     except:
         logging.info("Unable to create logs directory")
     try:
-        os.mkdir('./Checkpoints.%'%(Options.RunName))
+        os.mkdir('./Checkpoints.%s'%(Options.RunName))
     except:
         logging.info("Unable to create Checkpoints directory")
 
     csv_logger = CSVLogger(TrainSummaries, append=True, separator=';')
-    tensb = ks.callbacks.TensorBoard(log_dir='./logs.%s' % (Options.RunName), histogram_freq=1, write_graph=True, write_grads=True, batch_size=Options.BatchSize, write_images=True, embeddings_freq=1)
-    checkpointer = ks.callbacks.ModelCheckpoint('./Checkpoints.%'%(Options.RunName), save_weights_only=False, period=1)
+    tensb = ks.callbacks.TensorBoard(log_dir='./logs.%s'%(Options.RunName), histogram_freq=1, write_graph=True, write_grads=True, batch_size=Options.BatchSize, write_images=True, embeddings_freq=1)
+    checkpointer = ks.callbacks.ModelCheckpoint('./Checkpoints.%s'%(Options.RunName), save_weights_only=False, period=1)
     earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=3, verbose=0, mode='auto')
 
     callbackList = [csv_logger, tensb, checkpointer, earlystopper]
