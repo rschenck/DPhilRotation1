@@ -36,6 +36,7 @@ def OptionParsing():
     parser.add_option('-g', '--gpunum', dest='gpunumber', default=0, type=int, help="GPU number to run on (if applicable).")
     parser.add_option('-s', '--savemodel', dest='savemodel', default=True, action='store_false', help="Set flag to not save model configuration and weights. Default is True.")
     parser.add_option('-q', '--seqlen', dest='seqlen', default=600, type=int, help="Input sequence length. Specifies the input array for sequence data. Default = 600.")
+    parser.add_option('-t', '--testmodel', dest='testmodel', default=False, action='store_true', help="Set flag to subset data to 0.05% of total for testing architecture and functions.")
     (options, args) = parser.parse_args()
     if not options.ModelData:
         parser.error('ERROR: Must provide a *.h5 file with train, test, and validation data.')
@@ -109,7 +110,7 @@ class ModelArch:
 
         # Construct model and optimizer
         self.optConstruct = self.CheckOptions(Options)
-        self.Model = self.ConstructModelArch(Options)
+        self.Model = self.ConstructModelArch(Options, data)
 
     def CheckOptions(self, Options):
         if Options.usrOpt not in ['adam','rmsprop', 'sgd']:
@@ -130,7 +131,7 @@ class ModelArch:
                 logging.WARNING("Unknown error.")
             return(opt)
 
-    def ConstructModelArch(self, Options):
+    def ConstructModelArch(self, Options, data):
 
         # Initialize a sequential model architecture
         model = ks.models.Sequential()
@@ -152,13 +153,31 @@ class ModelArch:
             model.add(ks.layers.Activation('relu'))
             model.add(ks.layers.Dropout(self.HiddenDropouts[i]))
 
-        model.add(ks.layers.Dense(self.OutputLayer))
+        model.add(ks.layers.Dense(self.OutputLayer, input_shape=(None,12,data.test_targets[1])))
         model.add(ks.layers.Activation('sigmoid'))
 
         # Compile the model
         model.compile(optimizer=self.optConstruct, loss='binary_crossentropy',metrics=['acc', 'mse'])
 
         return(model)
+
+def SmallTrainSetMaker(data):
+    trainchoice = np.random.choice(data.train_seqs.shape[0], int(data.train_seqs.shape[0] * 0.005), replace=False)
+    train_seqs_small = data.train_seqs[trainchoice,]
+    train_targets_small = data.train_targets[trainchoice,]
+
+    testchoice = np.random.choice(data.test_seqs.shape[0], int(data.test_seqs.shape[0] * 0.005), replace=False)
+    test_seqs_small = data.test_seqs[testchoice,]
+    test_targets_small = data.test_targets[testchoice,]
+
+    return(train_seqs_small, train_targets_small, test_seqs_small, test_targets_small)
+
+def SmallValidSetMaker(data):
+    evalchoice = np.random.choice(data.valid_seqs.shape[0], int(data.valid_seqs.shape[0] * 0.005), replace=False)
+    valid_seqs_small = data.test_seqs[evalchoice,]
+    valid_targets_small = data.test_targets[evalchoice,]
+
+    return(valid_seqs_small, valid_targets_small)
 
 def TrainModel(Options, model, data):
     if Options.outputdir is not None:
@@ -167,6 +186,14 @@ def TrainModel(Options, model, data):
     else:
         TrainSummaries = Options.RunName + ".trainlog.csv"
         historypickle = Options.RunName + ".trainhistory.p"
+
+    if Options.testmodel:
+        train_seqs, train_targets, test_seqs, test_targets = SmallTrainSetMaker(data)
+    else:
+        train_seqs = data.train_seqs
+        train_targets = data.train_targets
+        test_seqs = data.test_seqs
+        test_targets = data.test_targets
 
     try:
         os.mkdir('./logs.%s'%(Options.RunName))
@@ -182,12 +209,12 @@ def TrainModel(Options, model, data):
     checkpointer = ks.callbacks.ModelCheckpoint(filepath=('./Checkpoints.' + Options.RunName + "/Checkpoints." + Options.RunName), save_weights_only=False, period=1)
     earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=3, verbose=0, mode='auto')
 
-    history = model.Model.fit(x=data.train_seqs, y=data.train_targets,
+    history = model.Model.fit(x=train_seqs, y=train_targets,
                     batch_size=Options.BatchSize,
                     epochs=Options.epochs,
                     verbose=1,
                     # steps_per_epoch=Options.BatchSize,
-                    validation_data=(data.test_seqs, data.test_targets),
+                    validation_data=(test_seqs, test_targets),
                     callbacks=[csv_logger, checkpointer, earlystopper, tensb])
 
     try:
@@ -201,8 +228,13 @@ def TrainModel(Options, model, data):
     return(model, csv_logger)
 
 def EvaluateModel(Options, model, data):
+    if Options.testmodel:
+        valid_seqs, valid_targets = SmallValidSetMaker(data)
+    else:
+        valid_seqs = data.valid_seqs
+        valid_targets = data.valid_targets
 
-    Evaluation = model.Model.evaluate(data.valid_seqs, data.valid_targets, verbose=1, batch_size=Options.BatchSize)
+    Evaluation = model.Model.evaluate(valid_seqs, valid_targets, verbose=1, batch_size=Options.BatchSize)
 
     return(Evaluation)
 
@@ -243,23 +275,26 @@ if __name__=="__main__":
     logging.info("Evaluating Model Results (loss/accuracy): %s\t%s" % (evaluation[0], evaluation[1]))
 
     if Options.outputdir is not None:
-        modelConfig = Options.outputdir + Options.RunName + "modelConfig.json"
+        modelConfig = Options.outputdir + Options.RunName + "modelConfig.yaml"
         modelWeights = Options.outputdir + Options.RunName + "modelWeights.h5"
     else:
-        modelConfig = Options.RunName + "modelConfig.json"
+        modelConfig = Options.RunName + "modelConfig.yaml"
         modelWeights = Options.RunName + "modelWeights.h5"
 
     try:
         logging.info("Saving model weights as HDF5 file.")
-        model.save_weights(modelWeights)
-    except:
+        model.Model.save_weights(modelWeights)
+    except Exception as e:
         logging.error("Unable to save modelWeights")
+        logging.error(e)
     try:
         logging.info("Saving json file of model configuration.")
+        modelYaml = model.Model.to_yaml()
         with open(modelConfig, 'w') as configOut:
-            configOut.write(model.get_config())
-    except:
+            configOut.write(modelYaml)
+    except Exception as e:
         logging.error("Unable to save model configuration")
+        logging.error(e)
 
     logging.info("Complete.\n")
 
