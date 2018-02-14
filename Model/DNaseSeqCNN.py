@@ -35,6 +35,7 @@ def OptionParsing():
     parser.add_option('--rungpu', dest='rungpu', default=False, action='store_true', help="Flag to use gpu, please also set --gpunum. Default False.")
     parser.add_option('-g', '--gpunum', dest='gpunumber', default=0, type=int, help="GPU number to run on (if applicable).")
     parser.add_option('-s', '--savemodel', dest='savemodel', default=True, action='store_false', help="Set flag to not save model configuration and weights. Default is True.")
+    parser.add_option('-q', '--seqlen', dest='seqlen', default=600, type=int, help="Input sequence length. Specifies the input array for sequence data. Default = 600.")
     (options, args) = parser.parse_args()
     if not options.ModelData:
         parser.error('ERROR: Must provide a *.h5 file with train, test, and validation data.')
@@ -137,7 +138,7 @@ class ModelArch:
         # Convolution Layers, normalizations, activations, and pooling
         for i, val in enumerate(self.ConvFilterSizes):
             if i==0:
-                model.add(ks.layers.Conv1D(filters=self.ConvLayers[i],kernel_size=self.ConvFilterSizes[i],input_shape=(600,4), padding="same"))
+                model.add(ks.layers.Conv1D(filters=self.ConvLayers[i],kernel_size=self.ConvFilterSizes[i],input_shape=(Options.seqlen,4), padding="same"))
             else:
                 model.add(ks.layers.Conv1D(filters=self.ConvLayers[i], kernel_size=self.ConvFilterSizes[i], padding="same"))
             model.add(ks.layers.BatchNormalization(axis=1))
@@ -151,11 +152,11 @@ class ModelArch:
             model.add(ks.layers.Activation('relu'))
             model.add(ks.layers.Dropout(self.HiddenDropouts[i]))
 
-        model.add(ks.layers.Dense(self.OutputLayer, input_shape=(None,12,3)))
+        model.add(ks.layers.Dense(self.OutputLayer))
         model.add(ks.layers.Activation('sigmoid'))
 
         # Compile the model
-        model.compile(optimizer=self.optConstruct, loss='binary_crossentropy',metrics=['acc', 'mse', ks.metrics.categorical_accuracy])
+        model.compile(optimizer=self.optConstruct, loss='binary_crossentropy',metrics=['acc', 'mse'])
 
         return(model)
 
@@ -178,7 +179,7 @@ def TrainModel(Options, model, data):
 
     csv_logger = CSVLogger(TrainSummaries, append=True, separator=';')
     tensb = ks.callbacks.TensorBoard(log_dir=('./logs.'+ Options.RunName), histogram_freq=1, write_graph=True, write_images=True)
-    checkpointer = ks.callbacks.ModelCheckpoint(filepath=('./Checkpoints.' + Options.RunName), save_weights_only=False, period=1)
+    checkpointer = ks.callbacks.ModelCheckpoint(filepath=('./Checkpoints.' + Options.RunName + "/Checkpoints." + Options.RunName), save_weights_only=False, period=1)
     earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=3, verbose=0, mode='auto')
 
     history = model.Model.fit(x=data.train_seqs, y=data.train_targets,
@@ -229,6 +230,11 @@ if __name__=="__main__":
 
     model = ModelArch(Options, data)
     logging.info("Model architecture compiled.")
+
+
+    # print(data.train_targets)
+    # print(data.train_targets.shape)
+    # print(model.Model.summary())
 
     model, csv_logger = TrainModel(Options, model, data)
 

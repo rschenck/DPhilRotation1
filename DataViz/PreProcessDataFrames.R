@@ -11,6 +11,7 @@ library(Sushi)
 library(karyoploteR)
 library(reshape2)
 library(plotly)
+library(ggplot2)
 
 #---Parse commands and set working path---#
 initial.options <- commandArgs(trailingOnly = FALSE)
@@ -30,6 +31,24 @@ dfcolnam <- c("Pos","8988T","AoSMC","Chorion","CLL","Fibrobl","FibroP","Gliobla"
 dfcolnam2 <- c("chr","start","end","8988T","AoSMC","Chorion","CLL","Fibrobl","FibroP","Gliobla","GM12891","GM12892","GM18507","GM19238","GM19239","GM19240","H9ES","HeLa-S3_IFNa4h","Hepatocytes","HPDE6-E6E7","HSMM_emb","HTR8svn","Huh-7.5Huh-7","iPS","Ishikawa_Estradiol","Ishikawa_4OHTAM","LNCaP_androgen","MCF-7_Hypoxia","Medullo","Melano","Myometr","Osteobl","PanIsletD","PanIslets","pHTE","ProgFib","RWPE1","Stellate","T-47D","CD4_Th0","Urothelia","Urothelia_UT189","AG04449","AG04450","AG09309","AG09319","AG10803","AoAF","BE2_C","BJ","Caco-2","CD20+","CD34+","CMK","GM06990","GM12864","GM12865","H7-hESC","HAc","HAEpiC","HA-h","HA-sp","HBMEC","HCF","HCFaa","HCM","HConF","HCPEpiC","HCT-116","HEEpiC","HFF","HFF-Myc","HGF","HIPEpiC","HL-60","HMF","HMVEC-dAd","HMVEC-dBl-Ad","HMVEC-dBl-Neo","HMVEC-dLy-Ad","HMVEC-dLy-Neo","HMVEC-dNeo","HMVEC-LBl","HMVEC-LLy","HNPCEpiC","HPAEC","HPAF","HPdLF","HPF","HRCEpiC","HRE","HRGEC","HRPEpiC","HVMF","Jurkat","Monocytes-CD14+","NB4","NH-A","NHDF-Ad","NHDF-neo","NHLF","NT2-D1","PANC-1","PrEC","RPTEC","SAEC","SKMC","SK-N-MC","SK-N-SH_RA","Th2","WERI-Rb-1","WI-38","WI-38_4OHTAM","A549","GM12878","H1-hESC","HeLa-S3","HepG2","HMEC","HSMM","HSMMtube","HUVEC","K562","LNCaP","MCF-7","NHEK","Th1","LNG.IMR90","ESC.H9","ESC.H1","IPSC.DF.6.9","IPSC.DF.19.11","ESDR.H1.NEUR.PROG","ESDR.H1.BMP4.MESO","ESDR.H1.BMP4.TROP","ESDR.H1.MSC","BLD.CD3.PPC","BLD.CD3.CPC","BLD.CD14.PC","BLD.MOB.CD34.PC.M","BLD.MOB.CD34.PC.F","BLD.CD19.PPC","BLD.CD56.PC","SKIN.PEN.FRSK.FIB.01","SKIN.PEN.FRSK.FIB.02","SKIN.PEN.FRSK.MEL.01","SKIN.PEN.FRSK.KER.02","BRST.HMEC.35","THYM.FET","BRN.FET.F","BRN.FET.M","MUS.PSOAS","MUS.TRNK.FET","MUS.LEG.FET","HRT.FET","GI.STMC.FET","GI.S.INT.FET","GI.L.INT.FET","GI.S.INT","GI.STMC.GAST","KID.FET","LNG.FET","OVRY","ADRL.GLND.FET","PLCNT.FET","PANC")
 colnames(df) <- dfcolnam
 
+sites = 2021868
+nonzerocols <- colSums(df[,2:165] != 0)
+zerocols <- colSums(df[,2:165] == 0)
+dataSummary <- data.frame(Cells=colnames(df)[2:165], FracZeros=zerocols/sites, FracNonZero=nonzerocols/sites, Set=rep("Cell Line",164))
+dataOverall <- data.frame(Cells="Total", FracZeros=sum(zerocols)/(sum(zerocols)+sum(nonzerocols)), FracNonZero=sum(nonzerocols)/(sum(zerocols)+sum(nonzerocols)), Set="Total")
+data <- rbind(dataSummary, dataOverall)
+datamelt <- melt(data, id=c("Cells","Set"))
+FracData <- datamelt
+saveRDS(FracData, "FractionOfClassifationsByCell.rds")
+
+p1 <- ggplot() + geom_bar(data=datamelt, aes(x=Cells, y=value, fill=variable), stat="identity") +
+  theme_minimal() + theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.text.x = element_text(size=4)) +
+  scale_fill_brewer(labels = c("0", "1"), palette="Set2") + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + scale_y_continuous(expand=c(0,0)) +
+  #facet_grid(~Set, scales = "free", space = "free") + 
+  ylab("Binary Fraction of Hypersensitivity Sites") + xlab("Cell Line") + 
+  theme(strip.background = element_blank(),strip.text.x = element_blank()) + guides(fill=guide_legend(title="Value"))
+p1
+
 ####### HeatMap of activity tables #######
 matrixify<-function(x) {
   m<-as.matrix(x[,-1])
@@ -37,6 +56,7 @@ matrixify<-function(x) {
   m
 }
 # [rows , columns]
+
 z = matrixify(df)
 p <- plot_ly(z = z, type = "heatmap")
 p

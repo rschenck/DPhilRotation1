@@ -22,8 +22,8 @@ ui <- navbarPage("Rotation 1",
                             # Sidebar panel for inputs ----
                             sidebarPanel(
                               
-                              uiOutput("chromSelect"),
-                              uiOutput("genomicPosition", inline = T)
+                              uiOutput("chromSelect1"),
+                              uiOutput("genomicPosition1", inline = T)
 
                               # Input: Select the random distribution type ----
                               #radioButtons("dist", "Distribution type:",
@@ -50,11 +50,12 @@ ui <- navbarPage("Rotation 1",
                               # Output: Tabset w/ plot, summary, and table ----
                               tabsetPanel(type = "tabs",
                                           tabPanel("Plot", 
-                                                   plotOutput("ideoPlot", height='100px',width="100%"),
-                                                   plotOutput("plot")
+                                                   plotOutput("ideoPlot1", height='100px',width="100%"),
+                                                   plotOutput("fractionzeros1", height='200px', width='100%'),
+                                                   plotOutput("processedHeatmap1", width='50%')
                                                    ),
-                                          tabPanel("Summary", verbatimTextOutput("summary")),
-                                          tabPanel("Table", tableOutput("table"))
+                                          tabPanel("Summary", verbatimTextOutput("summary1")),
+                                          tabPanel("Table", tableOutput("table1"))
                               )
                             )
                           ),
@@ -69,7 +70,60 @@ ui <- navbarPage("Rotation 1",
                                       padding: 0px;"
                           )
                           ),
-                 tabPanel("Processed-Data"),
+                 tabPanel("Processed-Data",
+                          # # Sidebar layout with input and output definitions ----
+                          # sidebarLayout(
+                          #   
+                          #   # Sidebar panel for inputs ----
+                          #   sidebarPanel(
+                          #     
+                          #     uiOutput("chromSelect"),
+                          #     uiOutput("genomicPosition", inline = T)
+                          #     
+                          #     # Input: Select the random distribution type ----
+                          #     #radioButtons("dist", "Distribution type:",
+                          #     #             c("Normal" = "norm",
+                          #     #               "Uniform" = "unif",
+                          #     #               "Log-normal" = "lnorm",
+                          #     #               "Exponential" = "exp")),
+                          #     
+                          #     # br() element to introduce extra vertical spacing ----
+                          #     #br(),
+                          #     
+                          #     # Input: Slider for the number of observations to generate ----
+                          #     #sliderInput("n",
+                          #     #            "Number of observations:",
+                          #     #            value = 500,
+                          #     #            min = 1,
+                          #     #            max = 1000)
+                          #     
+                          #   ),
+                          #   
+                          #   # Main panel for displaying outputs ----
+                          #   mainPanel(
+                          #     
+                          #     # Output: Tabset w/ plot, summary, and table ----
+                          #     tabsetPanel(type = "tabs",
+                          #                 tabPanel("Plot", 
+                          #                          plotOutput("ideoPlot", height='100px',width="100%"),
+                          #                          plotOutput("plot")
+                          #                 ),
+                          #                 tabPanel("Summary", verbatimTextOutput("summary")),
+                          #                 tabPanel("Table", tableOutput("table"))
+                          #     )
+                          #   )
+                          # ),
+                          tags$footer(tags$a(href="www.rstudio.com", "Ryan Schenck"),  align = "center",
+                                      style = "
+                                      position:absolute;
+                                      bottom:0;
+                                      width:100%;
+                                      height:50px; /* Height of the footer */
+                                      color: white;
+                                      padding: 0px;"
+                          )
+                          
+                          ),
                  tabPanel("Model Training"),
                  tabPanel("Mutagenesis")
                           )
