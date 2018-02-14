@@ -204,3 +204,8 @@ vignettes/*.pdf
 /Model/Checkpoints.*
 /Model/logs.*
 /Utils/dna_io_depracated.py
+/Model/*.json
+/Model/*.yaml
+/Model/*.h5
+
+
