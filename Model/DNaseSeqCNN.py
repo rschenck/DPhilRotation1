@@ -206,7 +206,7 @@ def TrainModel(Options, model, data):
 
     csv_logger = CSVLogger(TrainSummaries, append=True, separator=';')
     tensb = ks.callbacks.TensorBoard(log_dir=('./logs.'+ Options.RunName), histogram_freq=1, write_graph=True, write_images=True)
-    checkpointer = ks.callbacks.ModelCheckpoint(filepath=('./Checkpoints.' + Options.RunName + "/Checkpoints." + Options.RunName), save_weights_only=False, period=1)
+    checkpointer = ks.callbacks.ModelCheckpoint(filepath=('./Checkpoints.' + Options.RunName + "/Checkpoints." + Options.RunName), save_weights_only=True, period=1)
     earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=3, verbose=0, mode='auto')
 
     history = model.Model.fit(x=train_seqs, y=train_targets,
