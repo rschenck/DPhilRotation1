@@ -27,7 +27,7 @@ else
     ENCODE=0
     # Download ENCODE DNase tracks to the target "Data/" directory
     wget -r ftp://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeAwgDnaseUniform -P Data/
-
+    wget http://hgdownload.soe.ucsc.edu/goldenPath/encodeDCC/cv.ra -P Data/ENCODE/
     # Rearrange data from ENCODE
     mv Data/hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeAwgDnaseUniform/ Data/ENCODE/
     rm -r Data/hgdownload.cse.ucsc.edu

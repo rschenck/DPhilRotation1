@@ -203,5 +203,9 @@ vignettes/*.pdf
 *.p
 /Model/Checkpoints.*
 /Model/logs.*
-/Utils/SandboxEvaluating.py
 /Utils/dna_io_depracated.py
+/Model/*.json
+/Model/*.yaml
+/Model/*.h5
+
+
