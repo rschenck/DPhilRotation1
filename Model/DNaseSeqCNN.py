@@ -22,7 +22,6 @@ def OptionParsing():
     parser = OptionParser(usage)
     parser.add_option('-f', '--h5File', dest='ModelData', default=None, help="*.h5 file created using CreateHDF5.py containing the train, test, and validation data sets.")
     parser.add_option('-r', '--runname', dest="RunName", default="Run0", type=str, help="Name of run. Default 'Run0'")
-    parser.add_option('--out', '--outputdir', dest="outputdir", default=None, help="Directory for any outputs")
     parser.add_option('--opt', '--optimizer', dest='usrOpt', default='adam', help="Optimizer used for training, either 'adam', 'rmsprop', or 'sgd'. Default='adam'.")
     parser.add_option('-m', '--momentum', dest='Momentum', default=0.98, type=float, help="Momentum value range(0,1) for optimization momentum, only compatible with 'sgd' optimizer. Default=0.98")
     parser.add_option('-l', '--learnrate', dest='LearningRate', default=0.002, type=float, help="Learning rate range(0,1) for optimization learning rate. Default=0.002.")
@@ -41,9 +40,7 @@ def OptionParsing():
     (options, args) = parser.parse_args()
     if not options.ModelData:
         parser.error('ERROR: Must provide a *.h5 file with train, test, and validation data.')
-    if options.outputdir is not None:
-        if options.outputdir[len(options.outputdir)-1] != '/':
-            options.outputdir = options.outputdir + '/'
+
     return(options, parser)
 
 class Data:
@@ -181,12 +178,8 @@ def SmallValidSetMaker(data):
     return(valid_seqs_small, valid_targets_small)
 
 def TrainModel(Options, model, data, allOutDir):
-    if Options.outputdir is not None:
-        TrainSummaries = Options.outputdir + Options.RunName + ".trainlog.csv"
-        historypickle = Options.outputdir + Options.RunName + ".trainhistory.p"
-    else:
-        TrainSummaries = allOutDir + "/" + Options.RunName + ".trainlog.csv"
-        historypickle = allOutDir + "/" + Options.RunName + ".trainhistory.p"
+    TrainSummaries = allOutDir + "/" + Options.RunName + ".trainlog.csv"
+    historypickle = allOutDir + "/" + Options.RunName + ".trainhistory.p"
 
     if Options.testmodel:
         train_seqs, train_targets, test_seqs, test_targets = SmallTrainSetMaker(data)
@@ -286,12 +279,8 @@ if __name__=="__main__":
 
     single_prediction = model.Model.predict(np.expand_dims(data.valid_seqs[0], axis=0))
 
-    if Options.outputdir is not None:
-        modelConfig = Options.outputdir + Options.RunName + ".modelConfig.yaml"
-        modelWeights = Options.outputdir + Options.RunName + ".modelWeights.h5"
-    else:
-        modelConfig = allOutDir + "/" + Options.RunName + ".modelConfig.yaml"
-        modelWeights = allOutDir + "/" + Options.RunName + ".modelWeights.h5"
+    modelConfig = allOutDir + "/" + Options.RunName + ".modelConfig.yaml"
+    modelWeights = allOutDir + "/" + Options.RunName + ".modelWeights.h5"
 
     try:
         logging.info("Saving model weights as HDF5 file.")
