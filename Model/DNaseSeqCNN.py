@@ -177,9 +177,17 @@ def SmallValidSetMaker(data):
 
     return(valid_seqs_small, valid_targets_small)
 
+class LossBatchHistory(ks.callbacks.Callback):
+    def on_train_begin(self, logs={}):
+        self.losses = []
+
+    def on_batch_end(self, batch, logs={}):
+        self.losses.append(logs.get('loss'))
+
 def TrainModel(Options, model, data, allOutDir):
     TrainSummaries = allOutDir + "/" + Options.RunName + ".trainlog.csv"
     historypickle = allOutDir + "/" + Options.RunName + ".trainhistory.p"
+    batchPickle = allOutDir + "/" + Options.RunName + ".batchhistory.p"
 
     if Options.testmodel:
         train_seqs, train_targets, test_seqs, test_targets = SmallTrainSetMaker(data)
@@ -199,9 +207,10 @@ def TrainModel(Options, model, data, allOutDir):
         logging.info("Unable to create Checkpoints directory")
 
     csv_logger = CSVLogger(TrainSummaries, append=True, separator=';')
-    tensb = ks.callbacks.TensorBoard(log_dir=(allOutDir + '/logs.'+ Options.RunName), histogram_freq=1, write_graph=False, write_images=False)
+    # tensb = ks.callbacks.TensorBoard(log_dir=(allOutDir + '/logs.'+ Options.RunName), histogram_freq=0, write_graph=False, write_images=False)
     checkpointer = ks.callbacks.ModelCheckpoint(filepath=(allOutDir + '/Checkpoints.' + Options.RunName + "/Checkpoints." + Options.RunName), save_weights_only=True, save_best_only=True ,period=1)
     earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=3, verbose=0, mode='auto')
+    batchHistory = LossBatchHistory()
 
     history = model.Model.fit(x=train_seqs, y=train_targets,
                     batch_size=Options.BatchSize,
@@ -209,13 +218,15 @@ def TrainModel(Options, model, data, allOutDir):
                     verbose=1,
                     # steps_per_epoch=Options.BatchSize,
                     validation_data=(test_seqs, test_targets),
-                    callbacks=[csv_logger, checkpointer, earlystopper, tensb])
+                    callbacks=[csv_logger, checkpointer, earlystopper, batchHistory])
 
     try:
         logging.info("Attempting to dump history pickle.")
         historyOut = {'acc':history.history['acc'], 'val_acc':history.history['val_acc'], 'loss':history.history['loss'], 'val_loss':history.history['val_loss']}
         pickle.dump(historyOut, open(historypickle, 'wb'))
         logging.info("Completed history pickle.")
+        pickle.dump(batchHistory, open(batchPickle, 'wb'))
+        logging.info("Completed batch history pickle.")
     except:
         logging.info("Unable to dump pickle.")
 
@@ -239,7 +250,7 @@ if __name__=="__main__":
 
     (Options, Parser) = OptionParsing()
 
-    allOutDir = "./%s.%s"%(Options.RunName,now.strftime("%Y-%m-%d.%H:%M"))
+    allOutDir = "./%s.%s"%(Options.RunName,now.strftime("%Y-%m-%d.%H.%M"))
 
     try:
         os.mkdir(allOutDir)
@@ -255,7 +266,6 @@ if __name__=="__main__":
         logging.info("Attempting to enable GPU. GPU number %s" % Options.gpunumber)
     else:
         logging.info("Running on CPU.")
-
 
     # Get Data and ModelArch (Model Architecture Class)
     data = Data(Options)
