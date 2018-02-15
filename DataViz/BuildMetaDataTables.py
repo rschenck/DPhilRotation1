@@ -99,13 +99,13 @@ def BuildTable(bedfiles, encode_files, ENCODE_metadata, roadmap_metadata, roadma
             try:
                 outLine.append(data['karyotype'])
             except KeyError:
-                outLine.append("Unspecified")
+                outLine.append("unspecified")
 
             outLine.append(data['type'].replace(" ","").lower())
             try:
                 outLine.append(data['tissue'])
             except KeyError:
-                outLine.append("Unspecified")
+                outLine.append("unspecified")
 
             outLine.append(data['tier'])
             try:
@@ -117,7 +117,7 @@ def BuildTable(bedfiles, encode_files, ENCODE_metadata, roadmap_metadata, roadma
             try:
                 outLine.append(data['lineage'])
             except KeyError:
-                outLine.append('Unspecified')
+                outLine.append('unspecified')
 
             outLine.append(data['description'])
 
@@ -130,9 +130,9 @@ def BuildTable(bedfiles, encode_files, ENCODE_metadata, roadmap_metadata, roadma
 
             outLine.append(row['TYPE'].lower())
             outLine.append(row['ANATOMY'].lower())
-            outLine.append('Unspecified')
-            outLine.append('None')
-            outLine.append('Unspecified')
+            outLine.append('unspecified')
+            outLine.append('none')
+            outLine.append('unspecified')
             outLine.append(row['Standardized Epigenome name'])
 
         else:

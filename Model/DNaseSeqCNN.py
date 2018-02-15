@@ -205,7 +205,7 @@ def TrainModel(Options, model, data):
         logging.info("Unable to create Checkpoints directory")
 
     csv_logger = CSVLogger(TrainSummaries, append=True, separator=';')
-    tensb = ks.callbacks.TensorBoard(log_dir=('./logs.'+ Options.RunName), histogram_freq=1, write_graph=True, write_images=True)
+    # tensb = ks.callbacks.TensorBoard(log_dir=('./logs.'+ Options.RunName), histogram_freq=1, write_graph=True, write_images=True)
     # checkpointer = ks.callbacks.ModelCheckpoint(filepath=('./Checkpoints.' + Options.RunName + "/Checkpoints." + Options.RunName), save_weights_only=True, period=1)
     earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=3, verbose=0, mode='auto')
 
@@ -215,7 +215,7 @@ def TrainModel(Options, model, data):
                     verbose=1,
                     # steps_per_epoch=Options.BatchSize,
                     validation_data=(test_seqs, test_targets),
-                    callbacks=[csv_logger, earlystopper, tensb])
+                    callbacks=[csv_logger, earlystopper])
 
     try:
         logging.info("Attempting to dump history pickle.")
@@ -268,11 +268,14 @@ if __name__=="__main__":
     # print(data.train_targets.shape)
     # print(model.Model.summary())
 
+
     model, csv_logger = TrainModel(Options, model, data)
 
     evaluation = EvaluateModel(Options, model, data)
 
     logging.info("Evaluating Model Results (loss/accuracy): %s\t%s" % (evaluation[0], evaluation[1]))
+
+    single_prediction = model.Model.predict(np.expand_dims(data.valid_seqs[0], axis=0))
 
     if Options.outputdir is not None:
         modelConfig = Options.outputdir + Options.RunName + "modelConfig.yaml"

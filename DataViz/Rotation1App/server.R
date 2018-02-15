@@ -11,15 +11,99 @@ library(GenomicRanges)
 library(circlize)
 library(karyoploteR)
 library(dplyr)
+library(DT)
+library(gridExtra)
 
 # Load in Data
 load('Data/GenomeLength.RData')
 #dfTotal <- readRDS('ProcessedBedFile.rds')
 dfRowSums <- readRDS('Data/SummaryBedFile.rds')
 FracData <- readRDS('Data/FractionOfClassifationsByCell.rds')
+CellData <- readRDS('Data/CellLineData.rds')
+CellLineData <- readRDS('Data/CellData.rds')
+
+otherize <- function(dfFreq){
+  outs <- data.frame(matrix(NA, ncol=length(colnames(dfFreq)), nrow=0))
+  for(i in unique(dfFreq$variable)){
+    dfotherize <- subset(dfFreq, dfFreq$variable==i)
+    tops <- tail(sort(dfotherize$Freq),3)
+    other = 0
+    otherFrac = 0
+    hold <- data.frame(matrix(NA, ncol=length(colnames(dfFreq)), nrow=0))
+    for(k in 1:length(dfotherize$Var1)){
+      if (dfotherize[k,]$Freq %in% tops){
+        hold <- rbind(hold, dfotherize[k,])
+      } else {
+        other = other + dfotherize[k,]$Freq
+        otherFrac = other + dfotherize[k,]$Freq.1
+      }
+    }
+    if(other!=0){
+      hold <- rbind(hold, data.frame(Var1='other', Freq=other, variable=i, Freq.1=otherFrac))
+    }
+    # Adjust Frequencies
+    for(i in 1:length(hold$Freq)){
+      hold[i,]$Freq.1 = hold[i,]$Freq/sum(hold$Freq)
+    }
+    
+    outs <- rbind(outs, hold)
+  }
+  outs$variable <- as.factor(as.character(outs$variable))
+  outs$Var1 <- as.factor(as.character(outs$Var1))
+  
+  return(outs)
+}
+
 
 shinyServer(function(input, output, session) {
   #=================~~~~~Pre-Processed Data~~~~~=====================#
+  output$karyotype <- renderUI({
+    selectInput( "karyo", "Karyotype", choices = unique(subset(CellData, CellData$variable=='Karyotype')$Var1), width = '100%', multiple=TRUE, selected=unique(subset(CellData, CellData$variable=='Karyotype')$Var1))
+  })
+  
+  output$tissue <- renderUI({
+    selectInput( "tissue", "Tissue", choices = unique(subset(CellData, CellData$variable=='Tissue')$Var1), multiple=TRUE, selected=unique(subset(CellData, CellData$variable=='Tissue')$Var1), selectize=F, size=3)
+  })
+  
+  output$lineage <- renderUI({
+    selectInput( "lineage", "Cell Lineage", choices = unique(subset(CellData, CellData$variable=='Lineage')$Var1), multiple=TRUE, selected=unique(subset(CellData, CellData$variable=='Lineage')$Var1), selectize=F, size=3)
+  })
+  
+  output$samtype <- renderUI({
+    selectInput( "samtype", "Sample Type", choices = unique(subset(CellData, CellData$variable=='Sample Type')$Var1), multiple=TRUE, selected=unique(subset(CellData, CellData$variable=='Sample Type')$Var1))
+  })
+  
+  # usrCellData <- reactive({
+  #   data <- CellData %>% filter(
+  #     chr == input$chrom1 &
+  #       start >= input$gpos1[1] &
+  #       end <= input$gpos1[2]
+  #   )
+  # })
+  
+  output$karyoPie <- renderPlot({
+    
+  })
+  
+  output$tissuePie <- renderPlotly({
+    plot_ly(data=subset(CellData, CellData$variable=="Tissue"), 
+            labels=~Var1, values=~Freq, type="pie",
+            textposition = 'inside',
+            textinfo = 'percent', insidetextfont=list(color='#FFFFFF')) 
+    # layout(title="Karyotype")
+  })
+  
+  # Generate a summary of the data ----
+  output$summary <- DT::renderDataTable({
+    CellLineData
+  })
+  
+  # Generate an HTML table view of the data ----
+  output$table <- DT::renderDataTable({
+    CellData
+  })
+  
+  #=================~~~~~Processed Data~~~~~~=====================#
   summaryData1 <- reactive({
     data <- dfRowSums %>% filter(
       chr == input$chrom1 &
@@ -48,10 +132,8 @@ shinyServer(function(input, output, session) {
     par(bg="white", mar=c(0,0,0,0))
     kp <- plotKaryotype(genome="hg19", chromosomes=c(input$chrom1), ideogram.plotter=kpAddCytobands, plot.params=pp)
     kpAddBaseNumbers(kp, cex=1, tick.len=6, minor.tick.len=3)
-    
     toPlot <- summaryData1()
     toPlot$Overall.Value[toPlot$Overall.Value==1] <- 0
-    print(toPlot)
     kpBars(kp, data=GRanges(toPlot), y1=toPlot$Overall.Value, ymin=1, ymax=max(toPlot$Overall.Value))
   })
   
@@ -77,54 +159,6 @@ shinyServer(function(input, output, session) {
   output$table1 <- renderTable({
     #data()
   })
-  
-  
-  
-  #=================~~~~~Processed Data~~~~~~=====================#
-  # summaryData <- reactive({
-  #     data <- dfRowSums %>% filter(
-  #             chr == input$chrom &
-  #             start >= input$gpos[1] &
-  #             end <= input$gpos[2]
-  #     )
-  # })
-  # 
-  # output$chromSelect <- renderUI({
-  #   selectInput( "chrom", "Chromosome", choices = unique(GenomeLength$chr), width = '100%')
-  # })
-  # 
-  # output$genomicPosition <- renderUI({
-  #   maxVal = subset(GenomeLength, GenomeLength$chr==input$chrom)[,3]
-  #   sliderInput( "gpos", "Genomic Position:", 
-  #                min = 0, max = maxVal, value = c(maxVal/5,maxVal/5*3), step=1)
-  # })
-  # 
-  # output$ideoPlot <- renderPlot({
-  #   pp <- getDefaultPlotParams(plot.type = 2)
-  #   pp$topmargin <- 0
-  #   pp$ideogramheight <- 15
-  #   pp$bottommargin <- 50
-  #   pp$data1height <- 5
-  #   pp$data1inmargin <- 0
-  #   par(bg="white", mar=c(0,0,0,0))
-  #   kp <- plotKaryotype(genome="hg19", chromosomes=c(input$chrom), ideogram.plotter=kpAddCytobands, plot.params=pp)
-  #   kpAddBaseNumbers(kp, cex=1, tick.len=6, minor.tick.len=3)
-  #   #kpPlotRegions(kp, data=GRanges(paste(input$chrom,":",input$gpos[1],"-",input$gpos[2],sep="")), col='red', r0=1.5, 
-  #   #               layer.margin=0)
-  #   toPlot <- summaryData()
-  #   print(toPlot)
-  #   kpBars(kp, data=GRanges(toPlot), y1=toPlot$Overall.Value, ymin=1, ymax=max(toPlot$Overall.Value))
-  # })
-  # 
-  # # Generate a summary of the data ----
-  # output$summary <- renderPrint({
-  #   #summary(data())
-  # })
-  # 
-  # # Generate an HTML table view of the data ----
-  # output$table <- renderTable({
-  #   #data()
-  # })
   
   #=================~~~~~Model Training Data~~~~~~=====================#
   

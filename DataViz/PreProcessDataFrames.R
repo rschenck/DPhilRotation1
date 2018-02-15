@@ -12,6 +12,7 @@ library(karyoploteR)
 library(reshape2)
 library(plotly)
 library(ggplot2)
+library(gridExtra)
 
 #---Parse commands and set working path---#
 initial.options <- commandArgs(trailingOnly = FALSE)
@@ -173,8 +174,99 @@ kpPlotRegions(kp, data=GRanges("chr1:100-16540358"), col='red', r0=1,
               layer.margin=0)
 kpBars(kp, data=GRanges(dfRowSums), y1=dfRowSums$Overall.Value)
 
+#=================~~~~~Cell Line Data~~~~~~=====================#
+otherize <- function(dfFreq){
+  outs <- data.frame(matrix(NA, ncol=length(colnames(dfFreq)), nrow=0))
+  for(i in unique(dfFreq$variable)){
+    dfotherize <- subset(dfFreq, dfFreq$variable==i)
+    tops <- tail(sort(dfotherize$Freq),3)
+    other = 0
+    otherFrac = 0
+    hold <- data.frame(matrix(NA, ncol=length(colnames(dfFreq)), nrow=0))
+    for(k in 1:length(dfotherize$Var1)){
+      if (dfotherize[k,]$Freq %in% tops){
+        hold <- rbind(hold, dfotherize[k,])
+      } else {
+        other = other + dfotherize[k,]$Freq
+        otherFrac = other + dfotherize[k,]$Freq.1
+      }
+    }
+    if(other!=0){
+      hold <- rbind(hold, data.frame(Var1='other', Freq=other, variable=i, Freq.1=otherFrac))
+    }
+    # Adjust Frequencies
+    for(i in 1:length(hold$Freq)){
+      hold[i,]$Freq.1 = hold[i,]$Freq/sum(hold$Freq)
+    }
+    
+    outs <- rbind(outs, hold)
+  }
+  outs$variable <- as.factor(as.character(outs$variable))
+  outs$Var1 <- as.factor(as.character(outs$Var1))
 
+  return(outs)
+}
 
+celldata <- read.csv("/Users/schencro/Desktop/Oxford/Rotation_1/CNN/DataViz/Rotation1App/Data/CellLineInfo.txt", header=T, sep='\t',stringsAsFactors = F)
+saveRDS(celldata, file="/Users/schencro/Desktop/Oxford/Rotation_1/CNN/DataViz/Rotation1App/Data/CellData.rds")
+karyotype = data.frame(table(celldata$Karyotype), variable=rep("Karyotype",3))
+karyotype = cbind(karyotype, data.frame(Freq.1=karyotype$Freq/sum(karyotype$Freq)))
+type = data.frame(table(celldata$Type), variable=rep("Sample Type",5))
+type = cbind(type, data.frame(Freq.1=type$Freq/sum(type$Freq)))
+tissue = data.frame(table(celldata$Tissue), variable=rep("Tissue",47))
+tissue = cbind(tissue, data.frame(Freq.1=tissue$Freq/sum(tissue$Freq)))
+lineage = data.frame(table(celldata$Lineage), variable=rep("Lineage",9))
+lineage = cbind(lineage, data.frame(Freq.1=lineage$Freq/sum(lineage$Freq)))
+treated = data.frame(Var1=c('Treated','Untreated'), Freq=c((length(celldata$Cell)-157),157), variable=c("Treatment","Treatment"), Freq.1=c(7/164,157/164))
+
+CellLineData <- rbind(karyotype, type, tissue, treated, lineage)
+saveRDS(CellLineData, file="/Users/schencro/Desktop/Oxford/Rotation_1/CNN/DataViz/Rotation1App/Data/CellLineData.rds")
+
+CellLineData <- subset(CellLineData, CellLineData$variable!='Tissue')
+CellLineDataPlot <- otherize(CellLineData)
+out <- by(data = CellLineDataPlot, INDICES = CellLineDataPlot$variable, FUN = function(i) {
+  i <- droplevels(i)
+  i <- ggplot(i, aes(x=variable,y=Freq.1,fill=Var1, label=Freq)) + 
+    geom_bar(stat="identity") +
+    xlab("") +
+    ylab("Fraction") +
+    geom_text(size = 4, position = position_stack(vjust = 0.5), col="white") +
+    scale_y_continuous(expand=c(0,0)) +
+    theme_minimal() +
+    scale_fill_brewer(palette="Set2") +
+    theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+    theme(strip.background = element_blank(), strip.text.x = element_blank()) + 
+    guides(fill=guide_legend(title=paste(unique(i$variable)[1],sep=""))) +
+    coord_flip()
+})
+print(class(out))
+do.call(grid.arrange, c(out, ncol=1))
+
+getPlot <- function(){
+  CellLineDataPlot <- subset(CellLineData, CellLineData$variable!='Tissue')
+  CellLineDataPlot <- otherize(CellLineDataPlot)
+  plotout <- by(data = CellLineDataPlot, INDICES = CellLineDataPlot$variable, FUN = function(i) {
+    i <- droplevels(i)
+    i <- ggplot(i, aes(x=variable,y=Freq.1,fill=Var1, label=Freq)) + 
+      geom_bar(stat="identity") +
+      xlab("") +
+      ylab("Fraction") +
+      geom_text(size = 4, position = position_stack(vjust = 0.5), col="white") +
+      scale_y_continuous(expand=c(0,0)) +
+      theme_minimal() +
+      scale_fill_brewer(palette="Set2") +
+      theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+      theme(strip.background = element_blank(), strip.text.x = element_blank()) + 
+      guides(fill=guide_legend(title=paste(unique(i$variable)[1],sep=""))) +
+      coord_flip()
+  })
+  g <- base::do.call(what=gridExtra::grid.arrange, c(plotout, ncol=1))
+  return(g)
+}
+
+lay <- rbind(c(1),
+             c(2))
+g <- grid.arrange(p1,p2, top="", layout_matrix=lay)
 
 #=================~~~~~Model Training Data~~~~~~=====================#
 library(reshape2)
