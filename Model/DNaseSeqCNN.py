@@ -206,7 +206,7 @@ def TrainModel(Options, model, data, allOutDir):
         logging.info("Unable to create Checkpoints directory")
 
     csv_logger = CSVLogger(TrainSummaries, append=True, separator=';')
-    # tensb = ks.callbacks.TensorBoard(log_dir=(allOutDir + '/logs.'+ Options.RunName), histogram_freq=1, write_graph=True, write_images=True)
+    tensb = ks.callbacks.TensorBoard(log_dir=(allOutDir + '/logs.'+ Options.RunName), histogram_freq=1, write_graph=False, write_images=True)
     checkpointer = ks.callbacks.ModelCheckpoint(filepath=(allOutDir + '/Checkpoints.' + Options.RunName + "/Checkpoints." + Options.RunName), save_weights_only=True, save_best_only=True ,period=1)
     earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=3, verbose=0, mode='auto')
 
@@ -216,7 +216,7 @@ def TrainModel(Options, model, data, allOutDir):
                     verbose=1,
                     # steps_per_epoch=Options.BatchSize,
                     validation_data=(test_seqs, test_targets),
-                    callbacks=[csv_logger, checkpointer, earlystopper])
+                    callbacks=[csv_logger, checkpointer, earlystopper, tensb])
 
     try:
         logging.info("Attempting to dump history pickle.")
