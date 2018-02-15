@@ -7,6 +7,7 @@ try:
     import logging
     import pickle
     from keras.callbacks import CSVLogger
+    import datetime
 
     import keras as ks
     import numpy as np
@@ -179,13 +180,13 @@ def SmallValidSetMaker(data):
 
     return(valid_seqs_small, valid_targets_small)
 
-def TrainModel(Options, model, data):
+def TrainModel(Options, model, data, allOutDir):
     if Options.outputdir is not None:
         TrainSummaries = Options.outputdir + Options.RunName + ".trainlog.csv"
         historypickle = Options.outputdir + Options.RunName + ".trainhistory.p"
     else:
-        TrainSummaries = Options.RunName + ".trainlog.csv"
-        historypickle = Options.RunName + ".trainhistory.p"
+        TrainSummaries = allOutDir + "/" + Options.RunName + ".trainlog.csv"
+        historypickle = allOutDir + "/" + Options.RunName + ".trainhistory.p"
 
     if Options.testmodel:
         train_seqs, train_targets, test_seqs, test_targets = SmallTrainSetMaker(data)
@@ -196,17 +197,17 @@ def TrainModel(Options, model, data):
         test_targets = data.test_targets
 
     try:
-        os.mkdir('./logs.%s'%(Options.RunName))
+        os.mkdir('%s/logs.%s'%(allOutDir, Options.RunName))
     except:
         logging.info("Unable to create logs directory")
     try:
-        os.mkdir('./Checkpoints.%s'%(Options.RunName))
+        os.mkdir('%s/Checkpoints.%s'%(allOutDir, Options.RunName))
     except:
         logging.info("Unable to create Checkpoints directory")
 
     csv_logger = CSVLogger(TrainSummaries, append=True, separator=';')
-    # tensb = ks.callbacks.TensorBoard(log_dir=('./logs.'+ Options.RunName), histogram_freq=1, write_graph=True, write_images=True)
-    checkpointer = ks.callbacks.ModelCheckpoint(filepath=('./Checkpoints.' + Options.RunName + "/Checkpoints." + Options.RunName), save_weights_only=True, period=1)
+    # tensb = ks.callbacks.TensorBoard(log_dir=(allOutDir + '/logs.'+ Options.RunName), histogram_freq=1, write_graph=True, write_images=True)
+    checkpointer = ks.callbacks.ModelCheckpoint(filepath=(allOutDir + '/Checkpoints.' + Options.RunName + "/Checkpoints." + Options.RunName), save_weights_only=True, save_best_only=True ,period=1)
     earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=3, verbose=0, mode='auto')
 
     history = model.Model.fit(x=train_seqs, y=train_targets,
@@ -241,10 +242,18 @@ def EvaluateModel(Options, model, data):
 if __name__=="__main__":
     # Setup Primary Variables
     FilePath = os.path.dirname(os.path.abspath(__file__))
+    now = datetime.datetime.now()
 
     (Options, Parser) = OptionParsing()
 
-    logging.basicConfig(filename="%s.log.txt" % (Options.RunName), level=logging.INFO)
+    allOutDir = "./%s.%s"%(Options.RunName,now.strftime("%Y-%m-%d.%H:%M"))
+
+    try:
+        os.mkdir(allOutDir)
+    except:
+        print("Unable to create Directory", file=sys.stdout)
+
+    logging.basicConfig(filename="%s/%s.log.txt" % (allOutDir,Options.RunName), level=logging.INFO)
 
     logging.info("Begin...")
 
@@ -269,7 +278,7 @@ if __name__=="__main__":
     # print(model.Model.summary())
 
 
-    model, csv_logger = TrainModel(Options, model, data)
+    model, csv_logger = TrainModel(Options, model, data, allOutDir)
 
     evaluation = EvaluateModel(Options, model, data)
 
@@ -278,11 +287,11 @@ if __name__=="__main__":
     single_prediction = model.Model.predict(np.expand_dims(data.valid_seqs[0], axis=0))
 
     if Options.outputdir is not None:
-        modelConfig = Options.outputdir + Options.RunName + "modelConfig.yaml"
-        modelWeights = Options.outputdir + Options.RunName + "modelWeights.h5"
+        modelConfig = Options.outputdir + Options.RunName + ".modelConfig.yaml"
+        modelWeights = Options.outputdir + Options.RunName + ".modelWeights.h5"
     else:
-        modelConfig = Options.RunName + "modelConfig.yaml"
-        modelWeights = Options.RunName + "modelWeights.h5"
+        modelConfig = allOutDir + "/" + Options.RunName + ".modelConfig.yaml"
+        modelWeights = allOutDir + "/" + Options.RunName + ".modelWeights.h5"
 
     try:
         logging.info("Saving model weights as HDF5 file.")
