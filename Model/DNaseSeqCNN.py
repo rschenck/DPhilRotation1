@@ -58,6 +58,8 @@ class Data:
         self.test_headers = None
         self.test_seqs = None
         self.test_targets = None
+        self.valid_seqs = None
+        self.valid_targets = None
         self.LoadData()
 
     # Loads *.h5 file to be used
@@ -164,18 +166,18 @@ def SmallTrainSetMaker(data):
     train_seqs_small = data.train_seqs[trainchoice,]
     train_targets_small = data.train_targets[trainchoice,]
 
-    testchoice = np.random.choice(data.test_seqs.shape[0], int(data.test_seqs.shape[0] * 0.005), replace=False)
-    test_seqs_small = data.test_seqs[testchoice,]
-    test_targets_small = data.test_targets[testchoice,]
+    validchoice = np.random.choice(data.valid_seqs.shape[0], int(data.valid_seqs.shape[0] * 0.005), replace=False)
+    valid_seqs_small = data.valid_seqs[validchoice,]
+    valid_targets_small = data.valid_targets[validchoice,]
 
-    return(train_seqs_small, train_targets_small, test_seqs_small, test_targets_small)
+    return(train_seqs_small, train_targets_small, valid_seqs_small, valid_targets_small)
 
-def SmallValidSetMaker(data):
-    evalchoice = np.random.choice(data.valid_seqs.shape[0], int(data.valid_seqs.shape[0] * 0.005), replace=False)
-    valid_seqs_small = data.test_seqs[evalchoice,]
-    valid_targets_small = data.test_targets[evalchoice,]
+def SmallTestSetMaker(data):
+    evalchoice = np.random.choice(data.test_seqs.shape[0], int(data.test_seqs.shape[0] * 0.005), replace=False)
+    test_seqs_small = data.test_seqs[evalchoice,]
+    test_targets_small = data.test_targets[evalchoice,]
 
-    return(valid_seqs_small, valid_targets_small)
+    return(test_seqs_small, test_targets_small)
 
 class LossBatchHistory(ks.callbacks.Callback):
     def on_train_begin(self, logs={}):
@@ -190,12 +192,12 @@ def TrainModel(Options, model, data, allOutDir):
     batchPickle = allOutDir + "/" + Options.RunName + ".batchhistory.p"
 
     if Options.testmodel:
-        train_seqs, train_targets, test_seqs, test_targets = SmallTrainSetMaker(data)
+        train_seqs, train_targets, valid_seqs, valid_targets = SmallTrainSetMaker(data)
     else:
         train_seqs = data.train_seqs
         train_targets = data.train_targets
-        test_seqs = data.test_seqs
-        test_targets = data.test_targets
+        valid_seqs = data.valid_seqs
+        valid_targets = data.valid_targets
 
     try:
         os.mkdir('%s/logs.%s'%(allOutDir, Options.RunName))
@@ -217,7 +219,7 @@ def TrainModel(Options, model, data, allOutDir):
                     epochs=Options.epochs,
                     verbose=1,
                     # steps_per_epoch=Options.BatchSize,
-                    validation_data=(test_seqs, test_targets),
+                    validation_data=(valid_seqs, valid_targets),
                     callbacks=[csv_logger, checkpointer, earlystopper, batchHistory])
 
     try:
@@ -240,12 +242,12 @@ def TrainModel(Options, model, data, allOutDir):
 
 def EvaluateModel(Options, model, data):
     if Options.testmodel:
-        valid_seqs, valid_targets = SmallValidSetMaker(data)
+        test_seqs, test_targets = SmallTestSetMaker(data)
     else:
-        valid_seqs = data.valid_seqs
-        valid_targets = data.valid_targets
+        test_seqs = data.test_seqs
+        test_targets = data.test_targets
 
-    Evaluation = model.Model.evaluate(valid_seqs, valid_targets, verbose=1, batch_size=Options.BatchSize)
+    Evaluation = model.Model.evaluate(test_seqs, test_targets, verbose=1, batch_size=Options.BatchSize)
 
     return(Evaluation)
 

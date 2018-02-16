@@ -210,5 +210,6 @@ vignettes/*.pdf
 /Model/Run0*
 /DataViz/Data/*.png
 /DataViz/Data/*.eps
+/Model/TestRun*
 
 
