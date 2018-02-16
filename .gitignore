@@ -208,5 +208,7 @@ vignettes/*.pdf
 /Model/*.yaml
 /Model/*.h5
 /Model/Run0*
+/DataViz/Data/*.png
+/DataViz/Data/*.eps
 
 

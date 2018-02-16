@@ -18,32 +18,25 @@ ui <- navbarPage("Rotation 1",
                  #titlePanel("Test"),
                  tabPanel("Pre-processed Data",
                           
-                          sidebarLayout(
-                            
-                            # Sidebar panel for inputs ----
-                            sidebarPanel(
-                              width=3,
-                              uiOutput("karyotype"),
-                              uiOutput("samtype"),
-                              uiOutput("tissue"),
-                              uiOutput("lineage")
-                              
-                            ),
-                            
-                            # Main panel for displaying outputs ----
-                            mainPanel(
-                              
+
                               # Output: Tabset w/ plot, summary, and table ----
                               tabsetPanel(type = "tabs",
+                                        
                                           tabPanel("Plot",
-                                                   plotOutput("karyoPie")
-                                                   # plotlyOutput("tissuePie", height='250px', width='33%')
+                                                    hr(),
+                                                    textOutput('textEmpty'),
+                                                    plotOutput('preImage', width="100%",height='100%'),
+                                                    hr(),
+                                                    fluidRow(
+                                                     column(3, h4("Frequency Data"), downloadButton('downloadData', label = "Download")),
+                                                     column(4, h4("Sample Data"), downloadButton('downloadData2', label = "Download"))
+                                                    )
                                           ),
                                           tabPanel("Data", DT::dataTableOutput("summary")),
                                           tabPanel("Frequencies", DT::dataTableOutput("table"))
                               )
-                            )
-                          )
+                            
+                          
                           ),
                  tabPanel("Processed-Data",
                           # Sidebar layout with input and output definitions ----
@@ -73,6 +66,32 @@ ui <- navbarPage("Rotation 1",
                             )
                           )
                           ),
-                 tabPanel("Model Training"),
+                 tabPanel("Model Training",
+                            # Sidebar layout with input and output definitions ----
+                            sidebarLayout(
+                              # Sidebar panel for inputs ----
+                              sidebarPanel(width=3,
+                                uiOutput("modelSelect")
+                              ),
+                              mainPanel(
+                                # Output: Tabset w/ plot, summary, and table ----
+                                tabsetPanel(type = "tabs",
+                                            tabPanel("Plot",
+                                                     fluidRow(
+                                                       splitLayout(cellWidths = c("30%", "30%", "40%"),
+                                                                   plotOutput("modelloss"), 
+                                                                   plotOutput("modelmse"),
+                                                                   plotOutput("modelacc"))
+                                                     )
+                                                     # plotOutput("modelloss"),
+                                                     # plotOutput("modelmse"),
+                                                     # plotOutput("modelacc")
+                                            )
+                                            # tabPanel("Summary", verbatimTextOutput("summary1")),
+                                            # tabPanel("Table", tableOutput("table1"))
+                                )
+                              )
+                            )
+                          ),
                  tabPanel("Mutagenesis")
                           )

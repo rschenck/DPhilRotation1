@@ -175,11 +175,11 @@ kpPlotRegions(kp, data=GRanges("chr1:100-16540358"), col='red', r0=1,
 kpBars(kp, data=GRanges(dfRowSums), y1=dfRowSums$Overall.Value)
 
 #=================~~~~~Cell Line Data~~~~~~=====================#
-otherize <- function(dfFreq){
+otherize <- function(dfFreq, top=3){
   outs <- data.frame(matrix(NA, ncol=length(colnames(dfFreq)), nrow=0))
   for(i in unique(dfFreq$variable)){
     dfotherize <- subset(dfFreq, dfFreq$variable==i)
-    tops <- tail(sort(dfotherize$Freq),3)
+    tops <- tail(sort(dfotherize$Freq),top)
     other = 0
     otherFrac = 0
     hold <- data.frame(matrix(NA, ncol=length(colnames(dfFreq)), nrow=0))
@@ -242,53 +242,57 @@ out <- by(data = CellLineDataPlot, INDICES = CellLineDataPlot$variable, FUN = fu
 print(class(out))
 do.call(grid.arrange, c(out, ncol=1))
 
-getPlot <- function(){
-  CellLineDataPlot <- subset(CellLineData, CellLineData$variable!='Tissue')
-  CellLineDataPlot <- otherize(CellLineDataPlot)
-  plotout <- by(data = CellLineDataPlot, INDICES = CellLineDataPlot$variable, FUN = function(i) {
-    i <- droplevels(i)
-    i <- ggplot(i, aes(x=variable,y=Freq.1,fill=Var1, label=Freq)) + 
-      geom_bar(stat="identity") +
-      xlab("") +
-      ylab("Fraction") +
-      geom_text(size = 4, position = position_stack(vjust = 0.5), col="white") +
-      scale_y_continuous(expand=c(0,0)) +
-      theme_minimal() +
-      scale_fill_brewer(palette="Set2") +
-      theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-      theme(strip.background = element_blank(), strip.text.x = element_blank()) + 
-      guides(fill=guide_legend(title=paste(unique(i$variable)[1],sep=""))) +
-      coord_flip()
-  })
-  g <- base::do.call(what=gridExtra::grid.arrange, c(plotout, ncol=1))
-  return(g)
-}
+# Pie Chart
+CellLineDataTissue <- otherize(CellLineData, top=14)
+pieData <- subset(CellLineDataTissue, CellLineDataTissue$variable=='Tissue')
 
-lay <- rbind(c(1),
-             c(2))
-g <- grid.arrange(p1,p2, top="", layout_matrix=lay)
+pieData$Var1 <- as.factor(as.character(pieData$Var1))
+
+m <- list(
+  l = 50,
+  r = 50,
+  b = 200,
+  t = 150,
+  pad = 4
+)
+p <- plot_ly(pieData, labels = ~Var1, values = ~Freq, type = 'pie',textposition = 'outside',textinfo = 'label+percent') %>%
+  layout(title = 'Tissue',
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         margin=m)
+p
+plotly_IMAGE(p, format="svg", out_file="TissuePieChart.svg", width=1000,height=1000)
 
 #=================~~~~~Model Training Data~~~~~~=====================#
 library(reshape2)
 library(ggplot2)
 library(gridExtra)
 
-trainData <- read.csv("~/Desktop/Epochs.txt", sep=";", header=TRUE)
-
+trainData <- read.csv("~/Desktop/Oxford/Rotation_1/CNN/Model/AllModelTrainingRunStatistics.txt", sep=';',header=TRUE)
 trainData <- melt(trainData, id.vars=c("epoch","Run"))
+
+saveRDS(trainData, "~/Desktop/Oxford/Rotation_1/CNN/DataViz/Rotation1App/Data/AllModelTrainingRunStatistics.rds")
+
 loss <- trainData[grepl('Loss', trainData$variable),]
 colnames(loss) <- c("Epoch","Run","Dataset","Metric")
 acc <- trainData[grepl('Acc', trainData$variable),]
 colnames(acc) <- c("Epoch","Run","Dataset","Metric")
+mse <- trainData[grepl('MSE', trainData$variable),]
+colnames(mse) <- c("Epoch","Run","Dataset","Metric")
 
 p1 <- ggplot(data=loss, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
   scale_color_brewer(palette="Set2")
-p1 <- p1 + xlab("Epoch") + ylab("Loss") + scale_x_continuous(breaks = seq(0,100,5)) + theme_light()
+p1 <- p1 + xlab("Epoch") + ylab("Loss") + scale_x_continuous(breaks=seq(min(trainData$epoch),max(trainData$epoch),by=10)) + theme_light()
 p1
 
 p2 <-  ggplot(data=acc, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
   scale_color_brewer(palette="Set2")
-p2 <- p2 + xlab("Epoch") + ylab("Accuracy") + scale_x_continuous(breaks = seq(0,100,5)) + theme_light()
+p2 <- p2 + xlab("Epoch") + ylab("Accuracy") + scale_x_continuous(breaks=seq(min(trainData$epoch),max(trainData$epoch),by=10)) + theme_light()
 p2
 
-g <- grid.arrange(p1,p2, top="")
+p3 <-  ggplot(data=mse, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
+  scale_color_brewer(palette="Set2")
+p3 <- p3 + xlab("Epoch") + ylab("Mean Square Error") + scale_x_continuous(breaks=seq(min(trainData$epoch),max(trainData$epoch),by=10)) + theme_light()
+p3
+
+g <- grid.arrange(p1,p2,p3, top="", nrow=1)

@@ -21,76 +21,38 @@ dfRowSums <- readRDS('Data/SummaryBedFile.rds')
 FracData <- readRDS('Data/FractionOfClassifationsByCell.rds')
 CellData <- readRDS('Data/CellLineData.rds')
 CellLineData <- readRDS('Data/CellData.rds')
-
-otherize <- function(dfFreq){
-  outs <- data.frame(matrix(NA, ncol=length(colnames(dfFreq)), nrow=0))
-  for(i in unique(dfFreq$variable)){
-    dfotherize <- subset(dfFreq, dfFreq$variable==i)
-    tops <- tail(sort(dfotherize$Freq),3)
-    other = 0
-    otherFrac = 0
-    hold <- data.frame(matrix(NA, ncol=length(colnames(dfFreq)), nrow=0))
-    for(k in 1:length(dfotherize$Var1)){
-      if (dfotherize[k,]$Freq %in% tops){
-        hold <- rbind(hold, dfotherize[k,])
-      } else {
-        other = other + dfotherize[k,]$Freq
-        otherFrac = other + dfotherize[k,]$Freq.1
-      }
-    }
-    if(other!=0){
-      hold <- rbind(hold, data.frame(Var1='other', Freq=other, variable=i, Freq.1=otherFrac))
-    }
-    # Adjust Frequencies
-    for(i in 1:length(hold$Freq)){
-      hold[i,]$Freq.1 = hold[i,]$Freq/sum(hold$Freq)
-    }
-    
-    outs <- rbind(outs, hold)
-  }
-  outs$variable <- as.factor(as.character(outs$variable))
-  outs$Var1 <- as.factor(as.character(outs$Var1))
-  
-  return(outs)
-}
-
+trainData <- readRDS('Data/AllModelTrainingRunStatistics.rds')
 
 shinyServer(function(input, output, session) {
   #=================~~~~~Pre-Processed Data~~~~~=====================#
-  output$karyotype <- renderUI({
-    selectInput( "karyo", "Karyotype", choices = unique(subset(CellData, CellData$variable=='Karyotype')$Var1), width = '100%', multiple=TRUE, selected=unique(subset(CellData, CellData$variable=='Karyotype')$Var1))
-  })
-  
-  output$tissue <- renderUI({
-    selectInput( "tissue", "Tissue", choices = unique(subset(CellData, CellData$variable=='Tissue')$Var1), multiple=TRUE, selected=unique(subset(CellData, CellData$variable=='Tissue')$Var1), selectize=F, size=3)
-  })
-  
-  output$lineage <- renderUI({
-    selectInput( "lineage", "Cell Lineage", choices = unique(subset(CellData, CellData$variable=='Lineage')$Var1), multiple=TRUE, selected=unique(subset(CellData, CellData$variable=='Lineage')$Var1), selectize=F, size=3)
-  })
-  
-  output$samtype <- renderUI({
-    selectInput( "samtype", "Sample Type", choices = unique(subset(CellData, CellData$variable=='Sample Type')$Var1), multiple=TRUE, selected=unique(subset(CellData, CellData$variable=='Sample Type')$Var1))
-  })
-  
-  # usrCellData <- reactive({
-  #   data <- CellData %>% filter(
-  #     chr == input$chrom1 &
-  #       start >= input$gpos1[1] &
-  #       end <= input$gpos1[2]
-  #   )
-  # })
-  
-  output$karyoPie <- renderPlot({
+  # Send a pre-rendered image, and don't delete the image after sending it
+  output$preImage <- renderImage({
+    # When input$n is 3, filename is ./images/image3.jpeg
+    filename <- normalizePath(file.path('./ENCODE_ROADMAP_SUMMARY.svg'))
+    # Return a list containing the filename and alt text
+    list(src = filename,
+         alt = paste("Image number", input$n))
     
+  }, deleteFile = FALSE)
+  
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste('DataFrequencies.csv', sep='')
+    },
+    content = function(con) {
+      write.csv(CellData, con,row.names=F)
   })
   
-  output$tissuePie <- renderPlotly({
-    plot_ly(data=subset(CellData, CellData$variable=="Tissue"), 
-            labels=~Var1, values=~Freq, type="pie",
-            textposition = 'inside',
-            textinfo = 'percent', insidetextfont=list(color='#FFFFFF')) 
-    # layout(title="Karyotype")
+  output$downloadData2 <- downloadHandler(
+    filename = function() {
+      paste('DataFrequencies.csv', sep='')
+    },
+    content = function(con) {
+      write.csv(CellLineData, con,row.names=F)
+    })
+  
+  output$textEmpty <- renderText({
+    invisible("ENCODE and Roadmap Epigenomics Data")
   })
   
   # Generate a summary of the data ----
@@ -146,10 +108,6 @@ shinyServer(function(input, output, session) {
     p1
   })
   
-  output$processedHeatmap1 <- renderPlot({
-    
-  })
-  
   # Generate a summary of the data ----
   output$summary1 <- renderPrint({
     #summary(data())
@@ -161,8 +119,43 @@ shinyServer(function(input, output, session) {
   })
   
   #=================~~~~~Model Training Data~~~~~~=====================#
+  output$modelSelect <- renderUI({
+    selectInput( "modelFilter", "Training Run", choices = unique(trainData$Run), multiple=TRUE, selected=unique(trainData$Run), size=3, selectize=F)
+  })
   
+  readyTrainData <- reactive({
+    data <- trainData %>% filter( Run == input$modelFilter )
+  })
   
+  output$modelloss <- renderPlot({
+    data <- readyTrainData()
+    loss <- data[grepl('Loss', data$variable),]
+    colnames(loss) <- c("Epoch","Run","Dataset","Metric")
+    ggplot(data=loss, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
+      scale_color_brewer(palette="Set2")+ xlab("Epoch") + ylab("Loss (Binary_Crossentropy)") + 
+      scale_x_continuous(breaks=seq(min(loss$Epoch),max(loss$Epoch),by=10)) + theme_light() +
+      ggtitle("Loss") + guides(colour=F, linetype=F)
+  })
+  
+  output$modelmse <- renderPlot({
+    data <- readyTrainData()
+    mse <- data[grepl('MSE', data$variable),]
+    colnames(mse) <- c("Epoch","Run","Dataset","Metric")
+    ggplot(data=mse, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
+      scale_color_brewer(palette="Set2") + xlab("Epoch") + ylab("Mean Square Error") + 
+      scale_x_continuous(breaks=seq(min(mse$Epoch),max(mse$Epoch),by=2)) + theme_light() +
+      ggtitle("MSE") + guides(colour=F, linetype=F)
+  })
+  
+  output$modelacc <- renderPlot({
+    data <- readyTrainData()
+    acc <- data[grepl('Acc', data$variable),]
+    colnames(acc) <- c("Epoch","Run","Dataset","Metric")
+    ggplot(data=acc, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
+      scale_color_brewer(palette="Set2") + ylab("Accuracy") + 
+      scale_x_continuous(breaks=seq(min(acc$Epoch),max(acc$Epoch),by=10)) + theme_light() +
+      ggtitle("Accuracy")
+  })
   
   #=================~~~~~Model Results Data~~~~~~=====================#
   

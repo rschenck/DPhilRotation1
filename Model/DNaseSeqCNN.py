@@ -27,11 +27,11 @@ def OptionParsing():
     parser.add_option('-l', '--learnrate', dest='LearningRate', default=0.002, type=float, help="Learning rate range(0,1) for optimization learning rate. Default=0.002.")
     parser.add_option('-b', '--batchsize', dest='BatchSize', default=128, type=int, help="Batch size for model training. Default=128.")
     parser.add_option('-e', '--epochs', dest="epochs", default=100, type=int, help="Epochs for training the model. Default=100.")
-    parser.add_option('-c', '--conv', dest="convlayerlist", default=[300,200,200], nargs='+', type=int, help="Convolution: List of convolutional layers. Default: [300, 200, 200]")
-    parser.add_option('-i', '--filters', dest="filtersize", default=[19,11,7], nargs='+', type=int, help="Convolution: Filter size of convolution layers, must be the same length as --conv. Default [19,11,7]")
-    parser.add_option('-p', '--poolwidth', dest="poolwidth", default=[3,4,4], nargs='+', type=int, help="Convolution: Max pool width after each convolution. Must the same length as --conv. Default [3,4,4]")
+    parser.add_option('-c', '--conv', dest="convlayerlist", default=[300,200,200, 200], nargs='+', type=int, help="Convolution: List of convolutional layers. Default: [300, 200, 200]")
+    parser.add_option('-i', '--filters', dest="filtersize", default=[19,11,7,7], nargs='+', type=int, help="Convolution: Filter size of convolution layers, must be the same length as --conv. Default [19,11,7]")
+    parser.add_option('-p', '--poolwidth', dest="poolwidth", default=[3,4,4,4], nargs='+', type=int, help="Convolution: Max pool width after each convolution. Must the same length as --conv. Default [3,4,4]")
     parser.add_option('-u', '--hiddinunits', dest="hiddenunits", default=[1000,1000], nargs='+', type=int, help="Dense: Hidden Units in fully connected layer. Default: [1000, 1000]")
-    parser.add_option('-d', '--dropouts', dest='drops', default=[0.3,0.3], nargs='+', type=float, help="Dropout values after each dense layer. Default [0.3,0.3]")
+    parser.add_option('-d', '--dropouts', dest='drops', default=[0.5,0.3], nargs='+', type=float, help="Dropout values after each dense layer. Default [0.3,0.3]")
     parser.add_option('--rungpu', dest='rungpu', default=False, action='store_true', help="Flag to use gpu, please also set --gpunum. Default False.")
     parser.add_option('-g', '--gpunum', dest='gpunumber', default=0, type=int, help="GPU number to run on (if applicable).")
     parser.add_option('-s', '--savemodel', dest='savemodel', default=True, action='store_false', help="Set flag to not save model configuration and weights. Default is True.")
@@ -209,7 +209,7 @@ def TrainModel(Options, model, data, allOutDir):
     csv_logger = CSVLogger(TrainSummaries, append=True, separator=';')
     # tensb = ks.callbacks.TensorBoard(log_dir=(allOutDir + '/logs.'+ Options.RunName), histogram_freq=1, write_graph=False, write_images=False)
     checkpointer = ks.callbacks.ModelCheckpoint(filepath=(allOutDir + '/Checkpoints.' + Options.RunName + "/Checkpoints." + Options.RunName), save_weights_only=True, save_best_only=True ,period=1)
-    earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=3, verbose=0, mode='auto')
+    earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=5, verbose=0, mode='auto')
     batchHistory = LossBatchHistory()
 
     history = model.Model.fit(x=train_seqs, y=train_targets,
@@ -225,10 +225,16 @@ def TrainModel(Options, model, data, allOutDir):
         historyOut = {'acc':history.history['acc'], 'val_acc':history.history['val_acc'], 'loss':history.history['loss'], 'val_loss':history.history['val_loss']}
         pickle.dump(historyOut, open(historypickle, 'wb'))
         logging.info("Completed history pickle.")
-        pickle.dump(batchHistory, open(batchPickle, 'wb'))
-        logging.info("Completed batch history pickle.")
-    except:
+    except Exception as e:
         logging.info("Unable to dump pickle.")
+        logging.error(e)
+
+    try:
+        pickle.dump(batchHistory.losses, open(batchPickle, 'wb'))
+        logging.info("Completed batch history pickle.")
+    except Exception as e:
+        logging.info("Unable to save batch history pickle.")
+        logging.error(e)
 
     return(model, csv_logger)
 
