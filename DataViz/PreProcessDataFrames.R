@@ -268,11 +268,13 @@ library(reshape2)
 library(ggplot2)
 library(gridExtra)
 
-trainData <- read.csv("~/Desktop/Oxford/Rotation_1/CNN/Model/AllModelTrainingRunStatistics.txt", sep=';',header=TRUE)
+trainData <- read.csv("~/Desktop/Oxford/Rotation_1/CNN/Model/AllModelTrainingRunStatistics.txt", sep=';',header=TRUE, stringsAsFactors = F)
 trainData <- melt(trainData, id.vars=c("epoch","Run"))
+colnames(trainData) <- c("Epoch","Run","Dataset","Metric")
+trainData$Dataset = as.character(trainData$Dataset)
 
 saveRDS(trainData, "~/Desktop/Oxford/Rotation_1/CNN/DataViz/Rotation1App/Data/AllModelTrainingRunStatistics.rds")
-
+trainData <- readRDS("~/Desktop/Oxford/Rotation_1/CNN/DataViz/Rotation1App/Data/AllModelTrainingRunStatistics.rds")
 loss <- trainData[grepl('Loss', trainData$variable),]
 colnames(loss) <- c("Epoch","Run","Dataset","Metric")
 acc <- trainData[grepl('Acc', trainData$variable),]
@@ -282,7 +284,7 @@ colnames(mse) <- c("Epoch","Run","Dataset","Metric")
 
 p1 <- ggplot(data=loss, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
   scale_color_brewer(palette="Set2")
-p1 <- p1 + xlab("Epoch") + ylab("Loss") + scale_x_continuous(breaks=seq(min(trainData$epoch),max(trainData$epoch),by=10)) + theme_light()
+p1 <- p1 + xlab("Epoch") + ylab("Loss") + theme_light()
 p1
 
 p2 <-  ggplot(data=acc, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 

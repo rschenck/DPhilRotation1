@@ -128,41 +128,56 @@ shinyServer(function(input, output, session) {
   })
   
   readyTrainData <- reactive({
-    data <- trainData %>% filter( Run == input$modelFilter )
+    data <- trainData %>% filter( Run %in% input$modelFilter )
   })
   
   output$modelloss <- renderPlot({
     data <- readyTrainData()
-    loss <- data[grepl('Loss', data$variable),]
-    colnames(loss) <- c("Epoch","Run","Dataset","Metric")
-    ggplot(data=loss, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
+    loss <- data[grepl('Loss', as.factor(data$Dataset)),]
+    p <- ggplot(data=loss, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
       scale_color_brewer(palette="Set2")+ xlab("Epoch") + ylab("Loss (Binary_Crossentropy)") + 
-      scale_x_continuous(breaks=seq(min(loss$Epoch),max(loss$Epoch),by=10)) + theme_light() +
+      theme_light() +
       ggtitle("Loss") + guides(colour=F, linetype=F)
+    return(p)
   })
   
   # output$modelmse <- renderPlot({
   #   data <- readyTrainData()
-  #   mse <- data[grepl('MSE', data$variable),]
+  #   mse <- data[grepl('MSE', as.factor(data$Dataset)),]
   #   colnames(mse) <- c("Epoch","Run","Dataset","Metric")
-  #   ggplot(data=mse, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
-  #     scale_color_brewer(palette="Set2") + xlab("Epoch") + ylab("Mean Square Error") + 
-  #     scale_x_continuous(breaks=seq(min(mse$Epoch),max(mse$Epoch),by=2)) + theme_light() +
+  #   ggplot(data=mse, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) +
+  #     scale_color_brewer(palette="Set2") + xlab("Epoch") + ylab("Mean Square Error") +
+  #     theme_light() +
   #     ggtitle("MSE") + guides(colour=F, linetype=F)
   # })
   
   output$modelacc <- renderPlot({
     data <- readyTrainData()
-    acc <- data[grepl('Acc', data$variable),]
-    colnames(acc) <- c("Epoch","Run","Dataset","Metric")
-    ggplot(data=acc, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
+    acc <- data[grepl('Acc', as.factor(data$Dataset)),]
+    p <- ggplot(data=acc, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
       scale_color_brewer(palette="Set2") + ylab("Accuracy") + 
-      scale_x_continuous(breaks=seq(min(acc$Epoch),max(acc$Epoch),by=10)) + theme_light() +
+      theme_light() +
       ggtitle("Accuracy")
+    return(p)
   })
   
-  output$modelsummary <- renderText({
-    
+  output$modelsummary <- renderUI({
+    if(length(input$modelFilter)!=1){
+      return("Please Select Only One Model.")
+    } else {
+      summaryIn <- paste('Data/',input$modelFilter, '.modelSummary.txt', sep='')
+      
+      rawText <- readLines(summaryIn) # get raw text
+      # split the text into a list of character vectors
+      #   Each element in the list contains one line
+      splitText <- stringi::stri_split(str = rawText, regex = '\\n')
+      
+      # wrap a paragraph tag around each element in the list
+      replacedText <- lapply(splitText, p)
+      
+      return(replacedText)
+      
+    }
   })
   
   #=================~~~~~Model Results Data~~~~~~=====================#

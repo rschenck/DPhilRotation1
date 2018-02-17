@@ -25,9 +25,8 @@ def OptionParsing():
     parser.add_option('-i', '--inputdir', dest='InputDir', default=None, help="Input directory containg model information")
     parser.add_option('-f', '--h5File', dest='ModelData', default=None, help="*.h5 file created using CreateHDF5.py containing the train, test, and validation data sets.")
     parser.add_option('-a', '--acttable', dest='act_table', default=None, help="DNase Seq activity table with cell line headers.")
-    parser.add_option('-s', '--savemodel', dest='savemodel', default=True, action='store_false', help="Set flag to not save model configuration and weights. Default is True.")
-    parser.add_option('-q', '--seqlen', dest='seqlen', default=600, type=int, help="Input sequence length. Specifies the input array for sequence data. Default = 600.")
     parser.add_option('-t', '--testmodel', dest='testmodel', default=False, action='store_true', help="Set flag to subset data to 0.05% of total for testing architecture and functions.")
+    parser.add_option('-m', '--modelName', dest='modelName', default=None, help="Identifier for model within the AllModelTrainingRunStatistics.txt")
     (options, args) = parser.parse_args()
     if not options.ModelData or not options.InputDir:
         parser.error('ERROR: Must provide a *.h5 file with train, test, and validation data and Input Directory from training.')
@@ -133,7 +132,7 @@ def RunPredictions(Options, data, model):
         allthresholds.append(thresholds)
         all_auc_scores.append(auc_score)
 
-    return(allfpr, alltpr, allthresholds, all_auc_scores)
+    return(allfpr, alltpr, allthresholds, all_auc_scores, test_targets, test_targets_pred)
 
 def BuildOutputTable(allOutDir, allfpr, alltpr, allthresholds, all_auc_scores):
     outFilename = "%s%s"%(allOutDir,"roc_curve_data.csv")
@@ -147,7 +146,7 @@ def BuildOutputTable(allOutDir, allfpr, alltpr, allthresholds, all_auc_scores):
         outFile.write(','.join(['Cell','AUC','tpr','fpr']) + '\n')
         outFile.write('\n'.join(line))
 
-def FormatROCtable(Options, rocTable):
+def FormatROCtable(Options, rocTable, allOutDir):
     with open(Options.act_table, 'r') as inAct:
         headers = inAct.readlines()[0].rstrip('\n').split('\t')
     headers = headers[1:len(headers)]
@@ -169,7 +168,7 @@ def FormatROCtable(Options, rocTable):
         finalDict.update({i+1:outDict[cellDict[i]]})
 
     with open(rocTable, 'r') as rocFile:
-        with open(rocTable.rstrip('.csv')+".appended.csv", 'w') as outFile:
+        with open(allOutDir + Options.modelName +".roc_curve_data.appended.csv", 'w') as outFile:
             for line in rocFile.readlines():
                 if line.startswith("Cell,AUC,tpr,fpr"):
                     outFile.write(line.rstrip('\n')+',Karyotype\n')
@@ -192,16 +191,24 @@ def main():
     except Exception as e:
         print(e, file=sys.stdout)
 
+    data = Data(Options)
+    model = LoadModel(Options)
+
+    # Write a model Summary for Shiny
+    if os.path.isfile(allOutDir + Options.modelName + '.modelSummary.txt'):
+        pass
+    else:
+        with open(allOutDir + Options.modelName + '.modelSummary.txt', 'w') as fh:
+            model.summary(print_fn=lambda x: fh.write(x + '\n'))
+
     if os.path.isfile("%s%s"%(allOutDir,"roc_curve_data.csv")) == False:
-        data = Data(Options)
-        model = LoadModel(Options)
-        allfpr, alltpr, allthresholds, all_auc_scores = RunPredictions(Options, data, model)
+        allfpr, alltpr, allthresholds, all_auc_scores, test_targets, test_targets_pred = RunPredictions(Options, data, model)
+        pickle.dump(test_targets_pred, open("%s%s"%(allOutDir,".test_targets_pred"), 'wb'))
         BuildOutputTable(allOutDir, allfpr, alltpr, allthresholds, all_auc_scores)
     else:
         print("ROC Curve Data found. Building visualization table.")
-        FormatROCtable(Options, "%s%s" % (allOutDir, "roc_curve_data.csv"))
-
-
+        FormatROCtable(Options, "%s%s" % (allOutDir, "roc_curve_data.csv"), allOutDir)
+        # CreateMacroAverages()
 
 if __name__ == "__main__":
     main()

@@ -88,7 +88,7 @@ ui <- navbarPage("Rotation 1",
                                                      # plotOutput("modelmse"),
                                                      # plotOutput("modelacc")
                                             ),
-                                            tabPanel("Model Summary", verbatimTextOutput("modelsummary"))
+                                            tabPanel("Model Summary", uiOutput("modelsummary"))
                                             # tabPanel("Table", tableOutput("table1"))
                                 )
                               )
