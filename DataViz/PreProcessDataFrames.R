@@ -299,13 +299,16 @@ g <- grid.arrange(p1,p2,p3, top="", nrow=1)
 
 
 # ROC Curves #
-rocdf <- read.csv("~/Desktop/Oxford/Rotation_1/CNN/Model/Run0.2018-02-16.17.05/ModelEvalOutput/roc_curve_data.csv", sep=',', header = T)
+rocdf <- read.csv("~/Desktop/Oxford/Rotation_1/CNN/Model/TestRun.29Jan2018.1100.batch128.adam.2018-02-15.22.04/ModelEvalOutput/roc_curve_data.appended.csv", sep=',', header = T)
 rocdf$Cell <- as.factor(rocdf$Cell)
-
-ggplot(rocdf, aes(x=tpr, y=fpr, colour=Cell)) + geom_line() + scale_x_continuous(expand=c(0,0)) +
-  scale_y_continuous(expand=c(0,0)) + theme_minimal() + xlab("False Positive Rate (1-Specificity)") + ylab("True Positive Rate (Sensitivity)") +
+rocdf$Karyotype <- as.factor(rocdf$Karyotype)
+ggplot(rocdf, aes(x=fpr, y=tpr, colour=Karyotype, group=Cell)) + geom_line(alpha=0.2) + scale_x_continuous(expand=c(0,0)) +
+  scale_y_continuous(expand=c(0,0)) + theme_minimal() + 
+  scale_color_brewer(palette="Set2") +
+  xlab("False Positive Rate (1-Specificity)") + ylab("True Positive Rate (Sensitivity)") +
   ggtitle("Receiver Operator Characteristics") + geom_abline(slope=1, intercept=0, size=0.2, linetype="dashed")
-
+  # guides(colour=F, linetype=F, fill=F)
+  
 
 
 

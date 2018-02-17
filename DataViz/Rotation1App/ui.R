@@ -71,23 +71,24 @@ ui <- navbarPage("Rotation 1",
                             sidebarLayout(
                               # Sidebar panel for inputs ----
                               sidebarPanel(width=3,
-                                uiOutput("modelSelect")
+                                uiOutput("modelSelect"),
+                                uiOutput("rocview")
                               ),
                               mainPanel(
                                 # Output: Tabset w/ plot, summary, and table ----
                                 tabsetPanel(type = "tabs",
                                             tabPanel("Plot",
                                                      fluidRow(
-                                                       splitLayout(cellWidths = c("30%", "30%", "40%"),
+                                                       splitLayout(cellWidths = c("45%", "55%"),
                                                                    plotOutput("modelloss"), 
-                                                                   plotOutput("modelmse"),
+                                                                   # plotOutput("modelmse"),
                                                                    plotOutput("modelacc"))
                                                      )
                                                      # plotOutput("modelloss"),
                                                      # plotOutput("modelmse"),
                                                      # plotOutput("modelacc")
-                                            )
-                                            # tabPanel("Summary", verbatimTextOutput("summary1")),
+                                            ),
+                                            tabPanel("Model Summary", verbatimTextOutput("modelsummary"))
                                             # tabPanel("Table", tableOutput("table1"))
                                 )
                               )

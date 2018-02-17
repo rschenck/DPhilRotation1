@@ -24,6 +24,7 @@ def OptionParsing():
     parser = OptionParser(usage)
     parser.add_option('-i', '--inputdir', dest='InputDir', default=None, help="Input directory containg model information")
     parser.add_option('-f', '--h5File', dest='ModelData', default=None, help="*.h5 file created using CreateHDF5.py containing the train, test, and validation data sets.")
+    parser.add_option('-a', '--acttable', dest='act_table', default=None, help="DNase Seq activity table with cell line headers.")
     parser.add_option('-s', '--savemodel', dest='savemodel', default=True, action='store_false', help="Set flag to not save model configuration and weights. Default is True.")
     parser.add_option('-q', '--seqlen', dest='seqlen', default=600, type=int, help="Input sequence length. Specifies the input array for sequence data. Default = 600.")
     parser.add_option('-t', '--testmodel', dest='testmodel', default=False, action='store_true', help="Set flag to subset data to 0.05% of total for testing architecture and functions.")
@@ -146,6 +147,38 @@ def BuildOutputTable(allOutDir, allfpr, alltpr, allthresholds, all_auc_scores):
         outFile.write(','.join(['Cell','AUC','tpr','fpr']) + '\n')
         outFile.write('\n'.join(line))
 
+def FormatROCtable(Options, rocTable):
+    with open(Options.act_table, 'r') as inAct:
+        headers = inAct.readlines()[0].rstrip('\n').split('\t')
+    headers = headers[1:len(headers)]
+
+    with open(os.path.dirname(os.path.abspath(__file__)).rstrip('Model')+"DataViz/Rotation1App/Data/CellLineInfo.txt", 'r') as cellFile:
+        cellData = [line.rstrip('\n') for line in cellFile]
+    cellHead = cellData[0]
+    del cellData[0]
+
+    outDict = {}
+    for line in cellData:
+        lineInfo = dict(zip(cellHead.split('\t'),line.split('\t')))
+        outDict.update({line.split('\t')[0]:lineInfo})
+
+    cellDict = dict(zip([i for i in range(0,164)],headers))
+
+    finalDict = {}
+    for i in cellDict:
+        finalDict.update({i+1:outDict[cellDict[i]]})
+
+    with open(rocTable, 'r') as rocFile:
+        with open(rocTable.rstrip('.csv')+".appended.csv", 'w') as outFile:
+            for line in rocFile.readlines():
+                if line.startswith("Cell,AUC,tpr,fpr"):
+                    outFile.write(line.rstrip('\n')+',Karyotype\n')
+                else:
+                    line = line.rstrip('\n').split(',', 1)
+                    lineout = finalDict[int(line[0])]['Karyotype']
+                    lineToWrite = ','.join([','.join(line),lineout])
+                    outFile.write(lineToWrite+'\n')
+
 def main():
     # Setup Primary Variables
     FilePath = os.path.dirname(os.path.abspath(__file__))
@@ -159,12 +192,16 @@ def main():
     except Exception as e:
         print(e, file=sys.stdout)
 
-    data = Data(Options)
-    model = LoadModel(Options)
+    if os.path.isfile("%s%s"%(allOutDir,"roc_curve_data.csv")) == False:
+        data = Data(Options)
+        model = LoadModel(Options)
+        allfpr, alltpr, allthresholds, all_auc_scores = RunPredictions(Options, data, model)
+        BuildOutputTable(allOutDir, allfpr, alltpr, allthresholds, all_auc_scores)
+    else:
+        print("ROC Curve Data found. Building visualization table.")
+        FormatROCtable(Options, "%s%s" % (allOutDir, "roc_curve_data.csv"))
 
-    allfpr, alltpr, allthresholds, all_auc_scores = RunPredictions(Options, data, model)
 
-    BuildOutputTable(allOutDir, allfpr, alltpr, allthresholds, all_auc_scores)
 
 if __name__ == "__main__":
     main()

@@ -123,6 +123,10 @@ shinyServer(function(input, output, session) {
     selectInput( "modelFilter", "Training Run", choices = unique(trainData$Run), multiple=TRUE, selected=unique(trainData$Run), size=3, selectize=F)
   })
   
+  output$rocview <- renderUI({
+    radioButtons("rocViewChoice", "ROC View:", c("All"='all',"Karyotype"='karyo',"Summary All"='sumall',"Summary Karyotype"='sumkaryo'))
+  })
+  
   readyTrainData <- reactive({
     data <- trainData %>% filter( Run == input$modelFilter )
   })
@@ -137,15 +141,15 @@ shinyServer(function(input, output, session) {
       ggtitle("Loss") + guides(colour=F, linetype=F)
   })
   
-  output$modelmse <- renderPlot({
-    data <- readyTrainData()
-    mse <- data[grepl('MSE', data$variable),]
-    colnames(mse) <- c("Epoch","Run","Dataset","Metric")
-    ggplot(data=mse, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
-      scale_color_brewer(palette="Set2") + xlab("Epoch") + ylab("Mean Square Error") + 
-      scale_x_continuous(breaks=seq(min(mse$Epoch),max(mse$Epoch),by=2)) + theme_light() +
-      ggtitle("MSE") + guides(colour=F, linetype=F)
-  })
+  # output$modelmse <- renderPlot({
+  #   data <- readyTrainData()
+  #   mse <- data[grepl('MSE', data$variable),]
+  #   colnames(mse) <- c("Epoch","Run","Dataset","Metric")
+  #   ggplot(data=mse, aes(x=Epoch, y=Metric, colour=Run)) + geom_line(aes(linetype=Dataset)) + 
+  #     scale_color_brewer(palette="Set2") + xlab("Epoch") + ylab("Mean Square Error") + 
+  #     scale_x_continuous(breaks=seq(min(mse$Epoch),max(mse$Epoch),by=2)) + theme_light() +
+  #     ggtitle("MSE") + guides(colour=F, linetype=F)
+  # })
   
   output$modelacc <- renderPlot({
     data <- readyTrainData()
@@ -155,6 +159,10 @@ shinyServer(function(input, output, session) {
       scale_color_brewer(palette="Set2") + ylab("Accuracy") + 
       scale_x_continuous(breaks=seq(min(acc$Epoch),max(acc$Epoch),by=10)) + theme_light() +
       ggtitle("Accuracy")
+  })
+  
+  output$modelsummary <- renderText({
+    
   })
   
   #=================~~~~~Model Results Data~~~~~~=====================#
