@@ -198,8 +198,11 @@ def main():
     if os.path.isfile(allOutDir + Options.modelName + '.modelSummary.txt'):
         pass
     else:
-        with open(allOutDir + Options.modelName + '.modelSummary.txt', 'w') as fh:
-            model.summary(print_fn=lambda x: fh.write(x + '\n'))
+        try:
+            with open(allOutDir + Options.modelName + '.modelSummary.txt', 'w') as fh:
+                model.summary(print_fn=lambda x: fh.write(x + '\n'))
+        except TypeError:
+            print("Unable to save model summary.")
 
     if os.path.isfile("%s%s"%(allOutDir,"roc_curve_data.csv")) == False:
         allfpr, alltpr, allthresholds, all_auc_scores, test_targets, test_targets_pred = RunPredictions(Options, data, model)
@@ -208,6 +211,7 @@ def main():
     else:
         print("ROC Curve Data found. Building visualization table.")
         FormatROCtable(Options, "%s%s" % (allOutDir, "roc_curve_data.csv"), allOutDir)
+        # TODO need to create micro and macro averages of the ROC curves. For Micro you use np.ravel() on the arrays with test_targets_pred
         # CreateMacroAverages()
 
 if __name__ == "__main__":
