@@ -207,6 +207,7 @@ def main():
     if os.path.isfile("%s%s"%(allOutDir,"roc_curve_data.csv")) == False:
         allfpr, alltpr, allthresholds, all_auc_scores, test_targets, test_targets_pred = RunPredictions(Options, data, model)
         pickle.dump(test_targets_pred, open("%s%s%s"%(allOutDir,Options.modelName,".test_targets_pred.p"), 'wb'))
+        pickle.dump(test_targets, open("%s%s%s"%(allOutDir,Options.modelName,".test_targets.p"), 'wb'))
         BuildOutputTable(allOutDir, allfpr, alltpr, allthresholds, all_auc_scores)
     else:
         print("ROC Curve Data found. Building visualization table.")
