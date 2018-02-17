@@ -106,7 +106,7 @@ def LoadModel(Options):
 def RunPredictions(Options, data, model):
     #### ONLY FOR RUNS THAT HAD INCORRECT DATA USED FOR TEST/VALIDATION
     # I Fucked up on this one. Trained using train and validation with the train and test datasets, not train and validate datasets
-    if Options.InputDir == 'TestRun.29Jan2018.1100.batch128.adam.2018-02-15.22.04/' or Options.InputDir == 'TestRun.lr0.01.batch128.adam.4layer.dropoutg.2018-02-16.15.02/':
+    if 'TestRun.29Jan2018.1100.batch128.adam.2018-02-15.22.04/' in Options.InputDir or 'TestRun.lr0.01.batch128.adam.4layer.dropoutg.2018-02-16.15.02/' in Options.InputDir:
         test_seqs = data.valid_seqs
         test_targets = data.valid_targets
         test_headers = data.test_headers
@@ -206,7 +206,7 @@ def main():
 
     if os.path.isfile("%s%s"%(allOutDir,"roc_curve_data.csv")) == False:
         allfpr, alltpr, allthresholds, all_auc_scores, test_targets, test_targets_pred = RunPredictions(Options, data, model)
-        pickle.dump(test_targets_pred, open("%s%s"%(allOutDir,".test_targets_pred"), 'wb'))
+        pickle.dump(test_targets_pred, open("%s%s%s"%(allOutDir,Options.modelName,".test_targets_pred.p"), 'wb'))
         BuildOutputTable(allOutDir, allfpr, alltpr, allthresholds, all_auc_scores)
     else:
         print("ROC Curve Data found. Building visualization table.")
