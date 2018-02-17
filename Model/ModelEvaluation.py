@@ -8,7 +8,7 @@ try:
     import logging
     import pickle
     from keras.callbacks import CSVLogger
-    from sklearn.metrics import roc_auc_score
+    from sklearn.metrics import roc_auc_score, roc_curve
     import datetime
 
     import keras as ks
@@ -78,6 +78,14 @@ class Data:
         logging.info("Train Data Shape:")
         logging.info(str(self.train_seqs.shape))
 
+def MakeSmallTestBatchPred(Options, data):
+    testchoice = np.random.choice(data.valid_seqs.shape[0], int(data.valid_seqs.shape[0] * 0.005), replace=False)
+    test_seq_small = data.test_seqs[testchoice,]
+    test_targets_small = data.test_targets[testchoice,]
+    test_header_small = data.test_headers[testchoice,]
+
+    return (test_seq_small, test_targets_small, test_header_small)
+
 def LoadModel(Options):
     model_to_load = glob.glob(Options.InputDir + "*.modelConfig.yaml")[0] # Should only be one
     weights_to_load = glob.glob(Options.InputDir + "*.modelWeights.h5")[0]
@@ -102,6 +110,8 @@ def RunPredictions(Options, data, model):
         test_seqs = data.valid_seqs
         test_targets = data.valid_targets
         test_headers = data.test_headers
+    elif Options.testmodel:
+        test_seqs, test_targets, test_headers = MakeSmallTestBatchPred(Options, data)
     else:
         test_seqs = data.test_seqs
         test_targets = data.test_targets
@@ -110,9 +120,31 @@ def RunPredictions(Options, data, model):
     print("Predicting values on testing sequences.", file=sys.stdout)
     test_targets_pred = model.predict(test_seqs)
 
-    rocvals = roc_auc_score(test_targets, test_targets_pred)
+    allfpr = []
+    alltpr = []
+    allthresholds = []
+    all_auc_scores = []
+    for i in range(0,test_targets.shape[1]):
+        fpr, tpr, thresholds = roc_curve(test_targets[:,i], test_targets_pred[:,i])
+        auc_score = roc_auc_score(test_targets[:,i], test_targets_pred[:,i])
+        allfpr.append(fpr)
+        alltpr.append(tpr)
+        allthresholds.append(thresholds)
+        all_auc_scores.append(auc_score)
 
-    print(rocvals, file=sys.stdout)
+    return(allfpr, alltpr, allthresholds, all_auc_scores)
+
+def BuildOutputTable(allOutDir, allfpr, alltpr, allthresholds, all_auc_scores):
+    outFilename = "%s%s"%(allOutDir,"roc_curve_data.csv")
+
+    line = [] # Format: CellHeader#, auc_score, tpr, fpr
+    for i in range(0,len(allfpr)): # Access Each Cell Line
+        for k in range(0,len(allfpr[i])):
+            line.append(','.join([str(i+1), repr(all_auc_scores[i]), repr(alltpr[i][k]), repr(allfpr[i][k])]))
+
+    with open(outFilename, 'w') as outFile:
+        outFile.write(','.join(['Cell','AUC','tpr','fpr']) + '\n')
+        outFile.write('\n'.join(line))
 
 def main():
     # Setup Primary Variables
@@ -130,7 +162,9 @@ def main():
     data = Data(Options)
     model = LoadModel(Options)
 
-    RunPredictions(Options, data, model)
+    allfpr, alltpr, allthresholds, all_auc_scores = RunPredictions(Options, data, model)
+
+    BuildOutputTable(allOutDir, allfpr, alltpr, allthresholds, all_auc_scores)
 
 if __name__ == "__main__":
     main()
