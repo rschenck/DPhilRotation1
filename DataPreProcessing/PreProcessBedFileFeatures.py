@@ -481,7 +481,6 @@ def main():
     chrom_lengths = ReadChromSizes(CHROMSIZES)
     db_targets, target_beds, target_dbi, db_add = OptionChecker(Options, Parser, FilePath)
 
-
     # Extract Peak Information from BED files
     chrom_files = GetPeaks(Options, target_beds, db_add, target_dbi, FilePath)
 
