@@ -174,7 +174,8 @@ class ModelArch:
         if Options.alphaweight is None:
             loss_eq = 'binary_crossentropy'
         else:
-            loss_eq = partial(self.w_categorical_crossentropy, alphaval=Options.alphaweight)
+            #loss_eq = partial(self.w_categorical_crossentropy, alphaval=Options.alphaweight)
+            loss_eq = 'binary_crossentropy'
 
         # Compile the model
         model.compile(optimizer=self.optConstruct, loss=loss_eq, metrics=['acc', 'mse'])
