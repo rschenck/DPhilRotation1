@@ -82,7 +82,6 @@ def CreateFractionAccessiblePred():
         cellInfo = [line.rstrip('\n') for line in inFile]
         del cellInfo[0]
 
-
     with open("/Users/schencro/Desktop/Oxford/Rotation_1/CNN/DataViz/Rotation1App/Data/FractionAccessiblePred.txt", 'w') as outFile:
         outFile.write("TrainRun\tKaryotype\tCell\tTrueFraction\tPredFraction\n")
         for sampleSet in files:

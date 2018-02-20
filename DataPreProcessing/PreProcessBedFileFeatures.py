@@ -102,12 +102,13 @@ def OptionParsing():
     parser.add_option('-o', dest='out_prefix', default='features', help='Output file prefix [Default: %default]')
     parser.add_option('-s', dest='feature_size', default=600, type='int', help='Extend features to this size [Default: %default]')
     parser.add_option('-y', dest='ignore_y', default=False, action='store_true', help='Ignore Y chromsosome features [Default: %default]')
+    parser.add_option('-c', dest='no_cancer', default=False, action='store_true', help="Filter out cancer samples...Development only.")
     (options, args) = parser.parse_args()
     if not options.target_beds_file:  # if target_beds_file is not given
         parser.error('ERROR: Must provide file labeling the targets and providing BED file paths.')
     return(options, parser)
 
-def OptionChecker(Options, Parser):
+def OptionChecker(Options, Parser, FilePath):
     # determine whether we'll add to an existing DB
     db_targets = []
     db_add = False
@@ -123,18 +124,28 @@ def OptionChecker(Options, Parser):
                 db_targets = db_act_in.readline().strip().split('\t')
                 db_act_in.close()
 
+    if Options.no_cancer:
+        with open(FilePath.replace("DataPreProcessing","DataViz/Rotation1App/Data/CellLineInfo.txt"), 'r') as inFile:
+            cellData = {line.rstrip('\n').split('\t',1)[0]:line.rstrip('\n').split('\t',1)[1] for line in inFile.readlines()}
+
     # read in targets and assign them indexes into the db
     target_beds = []
     target_dbi = []
-    for line in open(Options.target_beds_file):
+    for line in open(Options.target_beds_file, 'r'):
         a = line.split()
         if len(a) != 2:
             print(a)
             print >> sys.stderr, 'Each row of the target BEDS file must contain a label and BED file separated by whitespace'
             exit(1)
-        target_dbi.append(len(db_targets))
-        db_targets.append(a[0])
-        target_beds.append(a[1])
+        if Options.no_cancer:
+            if cellData[a[0]].split('\t')[1] != 'cancer':
+                target_dbi.append(len(db_targets))
+                db_targets.append(a[0])
+                target_beds.append(a[1])
+        else:
+            target_dbi.append(len(db_targets))
+            db_targets.append(a[0])
+            target_beds.append(a[1])
     return(db_targets, target_beds, target_dbi, db_add)
 
 def activity_set(act_cs):
@@ -468,7 +479,8 @@ def main():
 
     # Extract Information from Primary Variables
     chrom_lengths = ReadChromSizes(CHROMSIZES)
-    db_targets, target_beds, target_dbi, db_add = OptionChecker(Options, Parser)
+    db_targets, target_beds, target_dbi, db_add = OptionChecker(Options, Parser, FilePath)
+
 
     # Extract Peak Information from BED files
     chrom_files = GetPeaks(Options, target_beds, db_add, target_dbi, FilePath)
