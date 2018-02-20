@@ -7,7 +7,10 @@ try:
     import logging
     import pickle
     from keras.callbacks import CSVLogger
+    import keras.backend as K
+    from itertools import product
     import datetime
+    from functools import partial
 
     import keras as ks
     import numpy as np
@@ -37,6 +40,7 @@ def OptionParsing():
     parser.add_option('-s', '--savemodel', dest='savemodel', default=True, action='store_false', help="Set flag to not save model configuration and weights. Default is True.")
     parser.add_option('-q', '--seqlen', dest='seqlen', default=600, type=int, help="Input sequence length. Specifies the input array for sequence data. Default = 600.")
     parser.add_option('-t', '--testmodel', dest='testmodel', default=False, action='store_true', help="Set flag to subset data to 0.05% of total for testing architecture and functions.")
+    parser.add_option('-w', '--alphaweight', dest='alphaweight', default=0.5, help="Weighted value for binary crossentropy, if specified a custom binary cross entropy equation is used.")
     (options, args) = parser.parse_args()
     if not options.ModelData:
         parser.error('ERROR: Must provide a *.h5 file with train, test, and validation data.')
@@ -131,6 +135,17 @@ class ModelArch:
                 logging.WARNING("Unknown error.")
             return(opt)
 
+    # TODO Create binary_crosentropy function with custom weight (alpha) such that the disproportionate 0:1 values are accounted for...
+    # def w_categorical_crossentropy(self, y_true, y_pred, alphaval):
+    #     nb_cl = len(weights)
+    #     final_mask = K.zeros_like(y_pred[:, 0])
+    #     y_pred_max = K.max(y_pred, axis=1)
+    #     y_pred_max = K.reshape(y_pred_max, (K.shape(y_pred)[0], 1))
+    #     y_pred_max_mat = K.equal(y_pred, y_pred_max)
+    #     for c_p, c_t in product(range(nb_cl), range(nb_cl)):
+    #         final_mask += (weights[c_t, c_p] * y_pred_max_mat[:, c_p] * y_true[:, c_t])
+    #     return K.categorical_crossentropy(y_pred, y_true) * final_mask
+
     def ConstructModelArch(self, Options, data):
 
         # Initialize a sequential model architecture
@@ -156,8 +171,13 @@ class ModelArch:
         model.add(ks.layers.Dense(self.OutputLayer, input_shape=(None,12,data.test_targets[1])))
         model.add(ks.layers.Activation('sigmoid'))
 
+        if Options.alphaweight is None:
+            loss_eq = 'binary_crossentropy'
+        else:
+            loss_eq = partial(self.w_categorical_crossentropy, alphaval=Options.alphaweight)
+
         # Compile the model
-        model.compile(optimizer=self.optConstruct, loss='binary_crossentropy',metrics=['acc', 'mse'])
+        model.compile(optimizer=self.optConstruct, loss=loss_eq, metrics=['acc', 'mse'])
 
         return(model)
 

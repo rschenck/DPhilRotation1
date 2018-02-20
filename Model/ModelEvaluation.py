@@ -8,8 +8,9 @@ try:
     import logging
     import pickle
     from keras.callbacks import CSVLogger
-    from sklearn.metrics import roc_auc_score, roc_curve
+    from sklearn.metrics import roc_auc_score, roc_curve, auc
     import datetime
+    from scipy import interp
 
     import keras as ks
     import numpy as np
@@ -146,6 +147,98 @@ def BuildOutputTable(allOutDir, allfpr, alltpr, allthresholds, all_auc_scores):
         outFile.write(','.join(['Cell','AUC','tpr','fpr']) + '\n')
         outFile.write('\n'.join(line))
 
+def GetMacroMicroAverages(test_targets, test_targets_pred, FilePath):
+    '''
+    If want to do predictions for a subset of the groupings just pass in the test targets,
+    and test_targets_pred of from those indices.
+    '''
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+
+    #~~~~~ 1st Calculate micro-averages for all samples... ~~~~#
+    # Compute micro-average ROC curve and ROC area
+    fpr["microall"], tpr["microall"], _ = roc_curve(test_targets.ravel(), test_targets_pred.ravel())
+    roc_auc["microall"] = auc(fpr["microall"], tpr["microall"])
+
+    #~~~~~ 2nd Calculate micro-averages for different karyotypes... ~~~~#
+    # 2a Extract predictions and test_targets of each of the karyotypes using the cellType Tables in DataViz
+    with open(FilePath.rstrip('Model') + '/DataViz/Rotation1App/Data/CellLineInfo.txt', 'r') as cellFile:
+        cells = [line.rstrip('\n').split('\t')[2] for line in cellFile.readlines()]
+        del cells[0]
+
+    test_target_karyo_indices = {t:[] for t in list(set(cells))}
+    for i, type in enumerate(cells):
+        test_target_karyo_indices[type].append(i)
+
+    readyForTests = dict()
+    for type in list(set(cells)):
+        test_targets_types = test_targets[:,test_target_karyo_indices[type]]
+        test_targets_pred_types = test_targets_pred[:,test_target_karyo_indices[type]]
+        readyForTests.update({type:{'test_targets':test_targets_types, 'test_targets_pred':test_targets_pred_types}})
+
+    for type in readyForTests:
+        label = "micro_%s"%(type)
+        fpr[label], tpr[label], _ = roc_curve(readyForTests[type]['test_targets'].ravel(), readyForTests[type]['test_targets_pred'].ravel())
+        roc_auc[label] = auc(fpr[label], tpr[label])
+    print("Micro averaging completed", file=sys.stdout)
+    #~~~~~ 3rd Getting macro averages ~~~~#
+    allfpr = []
+    alltpr = []
+    all_auc_scores = []
+    for i in range(0, test_targets.shape[1]):
+        fprind, tprind, _ = roc_curve(test_targets[:, i], test_targets_pred[:, i])
+        auc_score = roc_auc_score(test_targets[:, i], test_targets_pred[:, i])
+        allfpr.append(fprind)
+        alltpr.append(tprind)
+        all_auc_scores.append(auc_score)
+
+    # First aggregate all false positive rates
+    fprAgg = np.unique(np.concatenate([allfpr[i] for i in range(0, test_targets.shape[1])]))
+    # Then interpolate all ROC curves at this points
+    mean_tpr = np.zeros_like(fprAgg)
+    for i in range(0, test_targets.shape[1]):
+        mean_tpr += interp(fprAgg, allfpr[i], alltpr[i])
+
+    # Finally average it and compute AUC
+    mean_tpr /= test_targets.shape[1]
+
+    fpr["macroall"] = fprAgg
+    tpr["macroall"] = mean_tpr
+    roc_auc["macroall"] = auc(fpr["macroall"], tpr["macroall"])
+
+    for type in readyForTests:
+        label = "macro_%s"%(type)
+
+        allfpr = []
+        alltpr = []
+        for i in range(0, readyForTests[type]['test_targets'].shape[1]):
+            fprind, tprind, _ = roc_curve(readyForTests[type]['test_targets'][:, i], readyForTests[type]['test_targets_pred'][:, i])
+            allfpr.append(fprind)
+            alltpr.append(tprind)
+
+        fprAgg = np.unique(np.concatenate([allfpr[i] for i in range(0, readyForTests[type]['test_targets'].shape[1])]))
+        mean_tpr = np.zeros_like(fprAgg)
+        for i in range(0, readyForTests[type]['test_targets'].shape[1]):
+            mean_tpr += interp(fprAgg, allfpr[i], alltpr[i])
+
+        mean_tpr /= readyForTests[type]['test_targets'].shape[1]
+
+        fpr[label] = fprAgg
+        tpr[label] = mean_tpr
+        roc_auc[label] = auc(fpr[label], tpr[label])
+
+    print("Micro averaging completed", file=sys.stdout)
+
+    return(fpr, tpr, roc_auc)
+
+def BuildSummaryTables(allOutDir, Options, fpr, tpr, roc_auc):
+    with open(allOutDir + Options.modelName +".roc_curve_data.micromacro.csv", 'w') as outFile:
+        outFile.write("SumType,AUC,tpr,fpr\n")
+        for item in fpr:
+            for i in range(0,len(fpr[item])):
+                outFile.write(','.join([item,repr(roc_auc[item]),repr(tpr[item][i]), repr(fpr[item][i])]) + "\n")
+
 def FormatROCtable(Options, rocTable, allOutDir):
     with open(Options.act_table, 'r') as inAct:
         headers = inAct.readlines()[0].rstrip('\n').split('\t')
@@ -200,20 +293,25 @@ def main():
     else:
         try:
             with open(allOutDir + Options.modelName + '.modelSummary.txt', 'w') as fh:
+                # Must be done locally.
                 model.summary(print_fn=lambda x: fh.write(x + '\n'))
         except TypeError:
             print("Unable to save model summary.")
 
     if os.path.isfile("%s%s"%(allOutDir,"roc_curve_data.csv")) == False:
+        # Must be done on the cluster...
         allfpr, alltpr, allthresholds, all_auc_scores, test_targets, test_targets_pred = RunPredictions(Options, data, model)
         pickle.dump(test_targets_pred, open("%s%s%s"%(allOutDir,Options.modelName,".test_targets_pred.p"), 'wb'))
         pickle.dump(test_targets, open("%s%s%s"%(allOutDir,Options.modelName,".test_targets.p"), 'wb'))
         BuildOutputTable(allOutDir, allfpr, alltpr, allthresholds, all_auc_scores)
     else:
+        # Must be done locally
         print("ROC Curve Data found. Building visualization table.")
         FormatROCtable(Options, "%s%s" % (allOutDir, "roc_curve_data.csv"), allOutDir)
-        # TODO need to create micro and macro averages of the ROC curves. For Micro you use np.ravel() on the arrays with test_targets_pred
-        # CreateMacroAverages()
+        test_targets = pickle.load(open("%s%s%s"%(allOutDir,Options.modelName,".test_targets.p"), 'rb'))
+        test_targets_pred = pickle.load(open("%s%s%s"%(allOutDir,Options.modelName,".test_targets_pred.p"), 'rb'))
+        fpr, tpr, roc_auc = GetMacroMicroAverages(test_targets, test_targets_pred, FilePath)
+        BuildSummaryTables(allOutDir, Options, fpr, tpr, roc_auc)
 
 if __name__ == "__main__":
     main()

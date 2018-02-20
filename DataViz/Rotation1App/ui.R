@@ -72,7 +72,10 @@ ui <- navbarPage("Rotation 1",
                               # Sidebar panel for inputs ----
                               sidebarPanel(width=3,
                                 uiOutput("modelSelect"),
-                                uiOutput("rocview")
+                                uiOutput("rocview"),
+                                tags$div(class="header", checked=NA,
+                                         tags$p("Please select a single training run above to view additional information.")
+                                )
                               ),
                               mainPanel(
                                 # Output: Tabset w/ plot, summary, and table ----
