@@ -211,5 +211,6 @@ vignettes/*.pdf
 /DataViz/Data/*.png
 /DataViz/Data/*.eps
 /Model/TestRun*
+/Model/NoCancerCells*
 
 

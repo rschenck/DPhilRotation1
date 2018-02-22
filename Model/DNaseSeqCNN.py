@@ -27,7 +27,7 @@ def OptionParsing():
     parser.add_option('-r', '--runname', dest="RunName", default="Run0", type=str, help="Name of run. Default 'Run0'")
     parser.add_option('--opt', '--optimizer', dest='usrOpt', default='adam', help="Optimizer used for training, either 'adam', 'rmsprop', or 'sgd'. Default='adam'.")
     parser.add_option('-m', '--momentum', dest='Momentum', default=0.98, type=float, help="Momentum value range(0,1) for optimization momentum, only compatible with 'sgd' optimizer. Default=0.98")
-    parser.add_option('-l', '--learnrate', dest='LearningRate', default=0.002, type=float, help="Learning rate range(0,1) for optimization learning rate. Default=0.002.")
+    parser.add_option('-l', '--learnrate', dest='LearningRate', default=0.001, type=float, help="Learning rate range(0,1) for optimization learning rate. Default=0.002.")
     parser.add_option('-b', '--batchsize', dest='BatchSize', default=128, type=int, help="Batch size for model training. Default=128.")
     parser.add_option('-e', '--epochs', dest="epochs", default=100, type=int, help="Epochs for training the model. Default=100.")
     parser.add_option('-c', '--conv', dest="convlayerlist", default=[300,200,200], nargs='+', type=int, help="Convolution: List of convolutional layers. Default: [300, 200, 200]")
@@ -40,7 +40,8 @@ def OptionParsing():
     parser.add_option('-s', '--savemodel', dest='savemodel', default=True, action='store_false', help="Set flag to not save model configuration and weights. Default is True.")
     parser.add_option('-q', '--seqlen', dest='seqlen', default=600, type=int, help="Input sequence length. Specifies the input array for sequence data. Default = 600.")
     parser.add_option('-t', '--testmodel', dest='testmodel', default=False, action='store_true', help="Set flag to subset data to 0.05% of total for testing architecture and functions.")
-    parser.add_option('-w', '--alphaweight', dest='alphaweight', default=0.5, help="Weighted value for binary crossentropy, if specified a custom binary cross entropy equation is used.")
+    parser.add_option('--usealpha', dest="usealpha", default=False, action='store_true', help="Whether or not to use an alpha weighting value")
+    parser.add_option('-w', '--alphaweight', dest='alphaweight', default=0.02, type=float, help="Weighted value for binary crossentropy, if specified a custom binary cross entropy equation is used.")
     (options, args) = parser.parse_args()
     if not options.ModelData:
         parser.error('ERROR: Must provide a *.h5 file with train, test, and validation data.')
@@ -91,6 +92,36 @@ class Data:
         logging.info("Train Data Shape:")
         logging.info(str(self.train_seqs.shape))
 
+class WeightedBinaryCrossEntropy(object):
+
+    def __init__(self, pos_ratio):
+        neg_ratio = 1. - pos_ratio
+        self.pos_ratio = K.constant([pos_ratio])
+        self.weights = K.constant([neg_ratio / pos_ratio])
+        self.__name__ = "weighted_binary_crossentropy({0})".format(pos_ratio)
+
+    def __call__(self, y_true, y_pred):
+        return self.weighted_binary_crossentropy(y_true, y_pred)
+
+    def weighted_binary_crossentropy(self, y_true, y_pred):
+        # Transform to logits
+        epsilon = K.epsilon()
+        y_pred = K.clip(y_pred, epsilon, 1 - epsilon)
+        y_pred = K.log(y_pred / (1 - y_pred))
+
+        #https://www.tensorflow.org/api_docs/python/tf/nn/weighted_cross_entropy_with_logits
+        cost = self.tfWeighted_cross_entropy_with_logits(y_true,y_pred)
+
+        return K.mean(cost * self.pos_ratio, axis=-1)
+
+    #seems more trustable, since it's exactly the tensorflow formula
+    def tfWeighted_cross_entropy_with_logits(self,y_true,y_pred):
+
+        posPart = y_true * (-K.log(K.sigmoid(y_pred))) * self.weights
+        negPart = (1-y_true)*(-K.log(1 - K.sigmoid(y_pred)))
+
+        return posPart + negPart
+
 class ModelArch:
     '''
     Model Architecture Information
@@ -135,17 +166,6 @@ class ModelArch:
                 logging.WARNING("Unknown error.")
             return(opt)
 
-    # TODO Create binary_crosentropy function with custom weight (alpha) such that the disproportionate 0:1 values are accounted for...
-    # def w_categorical_crossentropy(self, y_true, y_pred, alphaval):
-    #     nb_cl = len(weights)
-    #     final_mask = K.zeros_like(y_pred[:, 0])
-    #     y_pred_max = K.max(y_pred, axis=1)
-    #     y_pred_max = K.reshape(y_pred_max, (K.shape(y_pred)[0], 1))
-    #     y_pred_max_mat = K.equal(y_pred, y_pred_max)
-    #     for c_p, c_t in product(range(nb_cl), range(nb_cl)):
-    #         final_mask += (weights[c_t, c_p] * y_pred_max_mat[:, c_p] * y_true[:, c_t])
-    #     return K.categorical_crossentropy(y_pred, y_true) * final_mask
-
     def ConstructModelArch(self, Options, data):
 
         # Initialize a sequential model architecture
@@ -175,7 +195,7 @@ class ModelArch:
             loss_eq = 'binary_crossentropy'
         else:
             #loss_eq = partial(self.w_categorical_crossentropy, alphaval=Options.alphaweight)
-            loss_eq = 'binary_crossentropy'
+            loss_eq = WeightedBinaryCrossEntropy(Options.alphaweight)
 
         # Compile the model
         model.compile(optimizer=self.optConstruct, loss=loss_eq, metrics=['acc', 'mse'])
@@ -287,6 +307,10 @@ if __name__=="__main__":
         print("Unable to create Directory", file=sys.stdout)
 
     logging.basicConfig(filename="%s/%s.log.txt" % (allOutDir,Options.RunName), level=logging.INFO)
+
+    with open(allOutDir + "/" + Options.RunName + ".SelectedOptions.txt", 'w') as outFile:
+        for i in vars(Options):
+            outFile.write('\t'.join([i, repr(getattr(Options, i))])+'\n')
 
     logging.info("Begin...")
 
