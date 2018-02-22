@@ -128,7 +128,6 @@ def OptionChecker(Options, Parser, FilePath):
         with open(FilePath.replace("DataPreProcessing","DataViz/Rotation1App/Data/CellLineInfo.txt"), 'r') as inFile:
             cellData = {line.rstrip('\n').split('\t',1)[0]:line.rstrip('\n').split('\t',1)[1] for line in inFile.readlines()}
 
-    sys.exit()
     # read in targets and assign them indexes into the db
     target_beds = []
     target_dbi = []
