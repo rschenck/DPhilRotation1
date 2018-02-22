@@ -18,17 +18,35 @@ def ParseMetaDataTable(FilePath):
         dfSub = df.loc[df['Experiment accession'] == exp]
         ids.update({exp:{'accessionName':list(dfSub['File accession']), 'files':list(dfSub["File download URL"]), 'replicates':list(dfSub["Biological replicate(s)"]), 'SampleType':list(set(list(dfSub['Biosample type'])))} })
 
-    outFile = "%s/Data/ENCODE_NewData/ENCODE_BedFileInfo.txt"%(FilePath)
+    try:
+        os.mkdir("%s/Data/ENCODE_NewData"%(FilePath))
+    except:
+        pass
+    myFile = "%s/Data/ENCODE_NewData/ENCODE_BedFileInfo.txt"%(FilePath)
 
-    with open(outFile, 'w') as outFile:
-        for exp in exps:
-            outfile.write(exps[exp]["accessionName"])
+    with open(myFile, 'w') as outFile:
+        for exp in ids:
+            for i, val in enumerate(ids[exp]['accessionName']):
+                outLine = [val, ids[exp]['files'][i], exp, ';'.join(ids[exp]['accessionName']), ids[exp]['replicates'][i], ids[exp]['SampleType'][0] ]
+                outFile.write('\t'.join(outLine)+'\n')
+
+    return(myFile)
+
+def DownloadData(inFile, FilePath):
+    outDir = FilePath + "/Data/ENCODE_NewData/"
+    with open(inFile, 'r') as toGet:
+        http = [line.split('\t')[1] for line in toGet.readlines()]
+    for f in http:
+        cmd = 'wget --directory-prefix=%s %s'%(outDir,f)
+        subprocess.call(cmd, shell=True)
 
 
 def main():
     FilePath = os.path.dirname(os.path.abspath(__file__))
 
-    ParseMetaDataTable(FilePath)
+    ToDownloadFile = ParseMetaDataTable(FilePath)
+    print(ToDownloadFile)
+    DownloadData(ToDownloadFile, FilePath)
 
 if __name__=="__main__":
     main()

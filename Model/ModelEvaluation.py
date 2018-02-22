@@ -312,11 +312,29 @@ def main():
     else:
         # Must be done locally
         print("ROC Curve Data found. Building visualization table.")
-        FormatROCtable(Options, "%s%s" % (allOutDir, "roc_curve_data.csv"), allOutDir)
-        test_targets = pickle.load(open("%s%s%s"%(allOutDir,Options.modelName,".test_targets.p"), 'rb'))
-        test_targets_pred = pickle.load(open("%s%s%s"%(allOutDir,Options.modelName,".test_targets_pred.p"), 'rb'))
-        fpr, tpr, roc_auc = GetMacroMicroAverages(Options, test_targets, test_targets_pred, FilePath)
-        BuildSummaryTables(allOutDir, Options, fpr, tpr, roc_auc)
+        # FormatROCtable(Options, "%s%s" % (allOutDir, "roc_curve_data.csv"), allOutDir)
+        # test_targets = pickle.load(open("%s%s%s"%(allOutDir,Options.modelName,".test_targets.p"), 'rb'))
+        # test_targets_pred = pickle.load(open("%s%s%s"%(allOutDir,Options.modelName,".test_targets_pred.p"), 'rb'))
+        # fpr, tpr, roc_auc = GetMacroMicroAverages(Options, test_targets, test_targets_pred, FilePath)
+        # BuildSummaryTables(allOutDir, Options, fpr, tpr, roc_auc)
+
+        # Inspect weights --------------------------------------------------------------
+        model_weights = model.get_weights()
+
+        # Conv Layer 1
+        filter_weights = model_weights[0]
+
+        # save conv filter weights
+        for k in range(10): # filter_weights.shape[2]
+            try:
+                os.mkdir(allOutDir + 'visualize')
+            except:
+                pass
+            np.savetxt(("%svisualize/%s.filter_%s.txt" % (allOutDir,Options.modelName,k)), filter_weights[:, :, k], delimiter="\t")
+
+        # Plot them using the supplied R script
+        os.system("Rscript %s/helper/plot_sequence_kernel_weights_per_dir.R %s/visualize %s/visualize plot_weight 10 5"%(FilePath,allOutDir,allOutDir))
+
 
 if __name__ == "__main__":
     main()
