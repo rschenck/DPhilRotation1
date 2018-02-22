@@ -40,7 +40,6 @@ def DownloadData(inFile, FilePath):
         cmd = 'wget --directory-prefix=%s %s'%(outDir,f)
         subprocess.call(cmd, shell=True)
 
-
 def main():
     FilePath = os.path.dirname(os.path.abspath(__file__))
 
