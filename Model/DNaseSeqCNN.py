@@ -109,9 +109,9 @@ class Data:
 class WeightedBinaryCrossEntropy(object):
 
     def __init__(self, pos_ratio):
-        neg_ratio = 1. - pos_ratio
+        self.neg_ratio = 1. - pos_ratio
         self.pos_ratio = K.constant([pos_ratio])
-        self.weights = K.constant([neg_ratio / pos_ratio])
+        self.weights = K.constant([self.neg_ratio / pos_ratio])
         self.__name__ = "weighted_binary_crossentropy({0})".format(pos_ratio)
 
     def __call__(self, y_true, y_pred):
@@ -126,7 +126,7 @@ class WeightedBinaryCrossEntropy(object):
         #https://www.tensorflow.org/api_docs/python/tf/nn/weighted_cross_entropy_with_logits
         cost = self.tfWeighted_cross_entropy_with_logits(y_true,y_pred)
 
-        return K.mean(cost * self.pos_ratio, axis=-1)
+        return K.mean(cost * self.pos_ratio, axis=-1)/(self.neg_ratio*12.)
 
     #seems more trustable, since it's exactly the tensorflow formula
     def tfWeighted_cross_entropy_with_logits(self,y_true,y_pred):
