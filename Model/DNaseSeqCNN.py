@@ -188,7 +188,7 @@ class ModelArch:
         # Convolution Layers, normalizations, activations, and pooling
         for i, val in enumerate(self.ConvFilterSizes):
             if i==0:
-                model.add(ks.layers.Conv1D(filters=self.ConvLayers[i],kernel_size=self.ConvFilterSizes[i],input_shape=(Options.seqlen,4), padding="same", kernel_initializer='RandomUniform'))
+                model.add(ks.layers.Conv1D(filters=self.ConvLayers[i],kernel_size=self.ConvFilterSizes[i],input_shape=(Options.seqlen,4), padding="same", kernel_initializer='glorot_uniform'))
             else:
                 model.add(ks.layers.Conv1D(filters=self.ConvLayers[i], kernel_size=self.ConvFilterSizes[i], padding="same"))
             model.add(ks.layers.BatchNormalization(axis=1))
@@ -205,7 +205,7 @@ class ModelArch:
         model.add(ks.layers.Dense(self.OutputLayer, input_shape=(None,12,data.test_targets[1])))
         model.add(ks.layers.Activation('sigmoid'))
 
-        if Options.alphaweight is None:
+        if Options.alphaweight is None and Options.usealpha==False:
             loss_eq = 'binary_crossentropy'
         else:
             #loss_eq = partial(self.w_categorical_crossentropy, alphaval=Options.alphaweight)
