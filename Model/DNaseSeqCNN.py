@@ -19,6 +19,16 @@ except Exception as e:
     print(e, file=sys.stdout)
     sys.exit("ERROR: Unable to load dependencies.")
 
+def parser_callback(option, opt, value, parser):
+  setattr(parser.values, option.dest, value.split(','))
+
+def makedtype(opttype, values):
+    if opttype=='int':
+        v = [int(i) for i in values]
+    elif opttype=='float':
+        v = [float(i) for i in values]
+    return(v)
+
 # Parse command line options
 def OptionParsing():
     usage = 'usage: %prog [options] -f <*.h5>'
@@ -30,11 +40,11 @@ def OptionParsing():
     parser.add_option('-l', '--learnrate', dest='LearningRate', default=0.001, type=float, help="Learning rate range(0,1) for optimization learning rate. Default=0.002.")
     parser.add_option('-b', '--batchsize', dest='BatchSize', default=128, type=int, help="Batch size for model training. Default=128.")
     parser.add_option('-e', '--epochs', dest="epochs", default=100, type=int, help="Epochs for training the model. Default=100.")
-    parser.add_option('-c', '--conv', dest="convlayerlist", default=[300,200,200], nargs='+', type=int, help="Convolution: List of convolutional layers. Default: [300, 200, 200]")
-    parser.add_option('-i', '--filters', dest="filtersize", default=[19,11,7], nargs='+', type=int, help="Convolution: Filter size of convolution layers, must be the same length as --conv. Default [19,11,7]")
-    parser.add_option('-p', '--poolwidth', dest="poolwidth", default=[3,4,4], nargs='+', type=int, help="Convolution: Max pool width after each convolution. Must the same length as --conv. Default [3,4,4]")
-    parser.add_option('-u', '--hiddinunits', dest="hiddenunits", default=[1000,1000], nargs='+', type=int, help="Dense: Hidden Units in fully connected layer. Default: [1000, 1000]")
-    parser.add_option('-d', '--dropouts', dest='drops', default=[0.3,0.3], nargs='+', type=float, help="Dropout values after each dense layer. Default [0.3,0.3]")
+    parser.add_option('-c', '--conv', dest="convlayerlist", default=[300,200,200], type=str, action='callback', callback=parser_callback, help="Convolution: List of convolutional layers. Default: [300, 200, 200]")
+    parser.add_option('-i', '--filters', dest="filtersize", default=[19,11,7], type=str, action='callback', callback=parser_callback, help="Convolution: Filter size of convolution layers, must be the same length as --conv. Default [19,11,7]")
+    parser.add_option('-p', '--poolwidth', dest="poolwidth", default=[3,4,4], type=str, action='callback', callback=parser_callback, help="Convolution: Max pool width after each convolution. Must the same length as --conv. Default [3,4,4]")
+    parser.add_option('-u', '--hiddinunits', dest="hiddenunits", default=[1000,1000], type=str, action='callback', callback=parser_callback, help="Dense: Hidden Units in fully connected layer. Default: [1000, 1000]")
+    parser.add_option('-d', '--dropouts', dest='drops', default=[0.3,0.3], type=str, action='callback', callback=parser_callback, help="Dropout values after each dense layer. Default [0.3,0.3]")
     parser.add_option('--rungpu', dest='rungpu', default=False, action='store_true', help="Flag to use gpu, please also set --gpunum. Default False.")
     parser.add_option('-g', '--gpunum', dest='gpunumber', default=0, type=int, help="GPU number to run on (if applicable).")
     parser.add_option('-s', '--savemodel', dest='savemodel', default=True, action='store_false', help="Set flag to not save model configuration and weights. Default is True.")
@@ -45,7 +55,11 @@ def OptionParsing():
     (options, args) = parser.parse_args()
     if not options.ModelData:
         parser.error('ERROR: Must provide a *.h5 file with train, test, and validation data.')
-
+    options.convlayerlist = makedtype('int',options.convlayerlist)
+    options.filtersize = makedtype('int',options.filtersize)
+    options.poolwidth = makedtype('int',options.poolwidth)
+    options.hiddenunits = makedtype('int', options.hiddenunits)
+    options.drops = makedtype('float', options.drops)
     return(options, parser)
 
 class Data:
@@ -174,7 +188,7 @@ class ModelArch:
         # Convolution Layers, normalizations, activations, and pooling
         for i, val in enumerate(self.ConvFilterSizes):
             if i==0:
-                model.add(ks.layers.Conv1D(filters=self.ConvLayers[i],kernel_size=self.ConvFilterSizes[i],input_shape=(Options.seqlen,4), padding="same"))
+                model.add(ks.layers.Conv1D(filters=self.ConvLayers[i],kernel_size=self.ConvFilterSizes[i],input_shape=(Options.seqlen,4), padding="same", kernel_initializer='RandomUniform'))
             else:
                 model.add(ks.layers.Conv1D(filters=self.ConvLayers[i], kernel_size=self.ConvFilterSizes[i], padding="same"))
             model.add(ks.layers.BatchNormalization(axis=1))
@@ -326,6 +340,7 @@ if __name__=="__main__":
     logging.info("Data loaded.")
 
     model = ModelArch(Options, data)
+
     logging.info("Model architecture compiled.")
 
 
