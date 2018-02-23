@@ -51,7 +51,7 @@ def OptionParsing():
     parser.add_option('-q', '--seqlen', dest='seqlen', default=600, type=int, help="Input sequence length. Specifies the input array for sequence data. Default = 600.")
     parser.add_option('-t', '--testmodel', dest='testmodel', default=False, action='store_true', help="Set flag to subset data to 0.05% of total for testing architecture and functions.")
     parser.add_option('--usealpha', dest="usealpha", default=False, action='store_true', help="Whether or not to use an alpha weighting value")
-    parser.add_option('-w', '--alphaweight', dest='alphaweight', default=0.02, type=float, help="Weighted value for binary crossentropy, if specified a custom binary cross entropy equation is used.")
+    parser.add_option('-w', '--alphaweight', dest='alphaweight', default=None, type=float, help="Weighted value for binary crossentropy, if specified a custom binary cross entropy equation is used.")
     (options, args) = parser.parse_args()
     if not options.ModelData:
         parser.error('ERROR: Must provide a *.h5 file with train, test, and validation data.')
