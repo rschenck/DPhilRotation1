@@ -312,7 +312,8 @@ def main():
     else:
         # Must be done locally
         print("ROC Curve Data found. Building visualization table.")
-        FormatROCtable(Options, "%s%s" % (allOutDir, "roc_curve_data.csv"), allOutDir)
+        if Options.nocancer == False:
+            FormatROCtable(Options, "%s%s" % (allOutDir, "roc_curve_data.csv"), allOutDir)
         test_targets = pickle.load(open("%s%s%s"%(allOutDir,Options.modelName,".test_targets.p"), 'rb'))
         test_targets_pred = pickle.load(open("%s%s%s"%(allOutDir,Options.modelName,".test_targets_pred.p"), 'rb'))
         fpr, tpr, roc_auc = GetMacroMicroAverages(Options, test_targets, test_targets_pred, FilePath)
