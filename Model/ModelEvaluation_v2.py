@@ -7,7 +7,6 @@ try:
     from optparse import OptionParser
     import logging
     import pickle
-    from keras.callbacks import CSVLogger
     from sklearn.metrics import roc_auc_score, roc_curve, auc
     import datetime
     from scipy import interp
@@ -26,6 +25,7 @@ def OptionParsing():
     parser.add_option('-i', '--inputdir', dest='InputDir', default=None, help="Input directory containg model information")
     parser.add_option('-f', '--h5File', dest='ModelData', default=None, help="*.h5 file created using CreateHDF5.py containing the train, test, and validation data sets.")
     parser.add_option('-a', '--acttable', dest='act_table', default=None, help="DNase Seq activity table with cell line headers.")
+    parser.add_option('-c', '--originalData', dest='originalData', default=False, action='store_true', help="Cell line file associated with the current data.")
     parser.add_option('-t', '--testmodel', dest='testmodel', default=False, action='store_true', help="Set flag to subset data to 0.05% of total for testing architecture and functions.")
     parser.add_option('-m', '--modelName', dest='modelName', default=None, help="Identifier for model within the AllModelTrainingRunStatistics.txt")
     parser.add_option('-c', '--nocancer', dest="nocancer", default=False, action="store_true", help="Pass flag to turn off karyotype partitioning in results.")
@@ -164,7 +164,7 @@ def GetMacroMicroAverages(Options, test_targets, test_targets_pred, FilePath):
 
     #~~~~~ 2nd Calculate micro-averages for different karyotypes... ~~~~#
     # 2a Extract predictions and test_targets of each of the karyotypes using the cellType Tables in DataViz
-    if Options.nocancer == False:
+    if Options.nocancer == False and Options.originalData:
         with open(FilePath.rstrip('Model') + '/DataViz/Rotation1App/Data/CellLineInfo.txt', 'r') as cellFile:
             cells = [line.rstrip('\n').split('\t')[2] for line in cellFile.readlines()]
             del cells[0]
@@ -333,7 +333,7 @@ def main():
             np.savetxt(("%svisualize/%s.filter_%s.txt" % (allOutDir,Options.modelName,k)), filter_weights[:, :, k], delimiter="\t")
 
         # Plot them using the supplied R script
-        os.system("Rscript %s/helper/plot_sequence_kernel_weights_per_dir.R %s/visualize %s/visualize plot_weight 10 5"%(FilePath,allOutDir,allOutDir))
+        # os.system("Rscript %s/helper/plot_sequence_kernel_weights_per_dir.R %s/visualize %s/visualize plot_weight 10 5"%(FilePath,allOutDir,allOutDir))
 
 
 if __name__ == "__main__":
