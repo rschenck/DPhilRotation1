@@ -126,7 +126,7 @@ class WeightedBinaryCrossEntropy(object):
         #https://www.tensorflow.org/api_docs/python/tf/nn/weighted_cross_entropy_with_logits
         cost = self.tfWeighted_cross_entropy_with_logits(y_true,y_pred)
 
-        return K.mean(cost * self.pos_ratio, axis=-1)/(self.neg_ratio*12.)
+        return K.mean(cost * self.pos_ratio, axis=-1)/(self.neg_ratio*10.)
 
     #seems more trustable, since it's exactly the tensorflow formula
     def tfWeighted_cross_entropy_with_logits(self,y_true,y_pred):
