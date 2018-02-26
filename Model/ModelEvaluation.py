@@ -279,11 +279,13 @@ def FormatROCtable(Options, rocTable, allOutDir):
 def main():
     # Setup Primary Variables
     FilePath = os.path.dirname(os.path.abspath(__file__))
+    print(FilePath)
     now = datetime.datetime.now()
 
     (Options, Parser) = OptionParsing()
     allOutDir = "%s%s"%(Options.InputDir,"ModelEvalOutput/")
-
+    print(allOutDir)
+    sys.exit()
     try:
         os.mkdir("%s%s"%(Options.InputDir,"ModelEvalOutput"))
     except Exception as e:
@@ -319,6 +321,10 @@ def main():
         fpr, tpr, roc_auc = GetMacroMicroAverages(Options, test_targets, test_targets_pred, FilePath)
         BuildSummaryTables(allOutDir, Options, fpr, tpr, roc_auc)
 
+        os.system("Rscript %s/helper/plot_roc_curves.R %s %s/ %s"%(FilePath, allOutDir, allOutDir, Options.modelName))
+        print("ROC plots made.")
+
+        print("Attempting to create filter plots.")
         # Inspect weights --------------------------------------------------------------
         model_weights = model.get_weights()
 
@@ -335,6 +341,7 @@ def main():
 
         # Plot them using the supplied R script
         os.system("Rscript %s/helper/plot_sequence_kernel_weights_per_dir.R %s/visualize %s/visualize plot_weight 10 5"%(FilePath,allOutDir,allOutDir))
+        print("Complete...")
 
 
 if __name__ == "__main__":
