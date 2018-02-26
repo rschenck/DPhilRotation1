@@ -13,6 +13,7 @@ try:
     from functools import partial
 
     import keras as ks
+    import tensorflow as tf
     import numpy as np
     import h5py
 except Exception as e:
@@ -109,9 +110,7 @@ class Data:
 class WeightedBinaryCrossEntropy(object):
 
     def __init__(self, pos_ratio):
-        self.neg_ratio = 1. - pos_ratio
-        self.pos_ratio = K.constant([pos_ratio])
-        self.weights = K.constant([self.neg_ratio / pos_ratio])
+        self.pos_ratio = pos_ratio
         self.__name__ = "weighted_binary_crossentropy({0})".format(pos_ratio)
 
     def __call__(self, y_true, y_pred):
@@ -124,17 +123,17 @@ class WeightedBinaryCrossEntropy(object):
         y_pred = K.log(y_pred / (1 - y_pred))
 
         #https://www.tensorflow.org/api_docs/python/tf/nn/weighted_cross_entropy_with_logits
-        cost = self.tfWeighted_cross_entropy_with_logits(y_true,y_pred)
+        # cost = tf.nn.weighted_cross_entropy_with_logits(y_true,y_pred)
 
-        return K.mean(cost * self.pos_ratio, axis=-1)/(self.neg_ratio*10.)
+        return tf.nn.weighted_cross_entropy_with_logits(y_true,y_pred, self.pos_ratio)
 
-    #seems more trustable, since it's exactly the tensorflow formula
-    def tfWeighted_cross_entropy_with_logits(self,y_true,y_pred):
-
-        posPart = y_true * (-K.log(K.sigmoid(y_pred))) * self.weights
-        negPart = (1-y_true)*(-K.log(1 - K.sigmoid(y_pred)))
-
-        return posPart + negPart
+    # #seems more trustable, since it's exactly the tensorflow formula
+    # def tfWeighted_cross_entropy_with_logits(self,y_true,y_pred):
+    #
+    #     posPart = y_true * (-K.log(K.sigmoid(y_pred))) * self.weights
+    #     negPart = (1-y_true)*(-K.log(1 - K.sigmoid(y_pred)))
+    #
+    #     return posPart + negPart
 
 class ModelArch:
     '''
@@ -343,11 +342,9 @@ if __name__=="__main__":
 
     logging.info("Model architecture compiled.")
 
-
     # print(data.train_targets)
     # print(data.train_targets.shape)
     # print(model.Model.summary())
-
 
     model, csv_logger = TrainModel(Options, model, data, allOutDir)
 

@@ -285,7 +285,7 @@ def main():
     (Options, Parser) = OptionParsing()
     allOutDir = "%s%s"%(Options.InputDir,"ModelEvalOutput/")
     print(allOutDir)
-    sys.exit()
+
     try:
         os.mkdir("%s%s"%(Options.InputDir,"ModelEvalOutput"))
     except Exception as e:
