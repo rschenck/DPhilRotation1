@@ -53,6 +53,7 @@ def OptionParsing():
     parser.add_option('-t', '--testmodel', dest='testmodel', default=False, action='store_true', help="Set flag to subset data to 0.05% of total for testing architecture and functions.")
     parser.add_option('--usealpha', dest="usealpha", default=False, action='store_true', help="Whether or not to use an alpha weighting value")
     parser.add_option('-w', '--alphaweight', dest='alphaweight', default=None, type=float, help="Weighted value for binary crossentropy, if specified a custom binary cross entropy equation is used.")
+    parser.add_option('-e', '--earlystopping', dest='earlystop', default=True, action='store_false', help="Turn off early stopping with this flag. Default is True.")
     (options, args) = parser.parse_args()
     if not options.ModelData:
         parser.error('ERROR: Must provide a *.h5 file with train, test, and validation data.')
@@ -265,8 +266,12 @@ def TrainModel(Options, model, data, allOutDir):
     csv_logger = CSVLogger(TrainSummaries, append=True, separator=';')
     # tensb = ks.callbacks.TensorBoard(log_dir=(allOutDir + '/logs.'+ Options.RunName), histogram_freq=1, write_graph=False, write_images=False)
     checkpointer = ks.callbacks.ModelCheckpoint(filepath=(allOutDir + '/Checkpoints.' + Options.RunName + "/Checkpoints." + Options.RunName), save_weights_only=True, save_best_only=True ,period=1)
-    earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=5, verbose=0, mode='auto')
     batchHistory = LossBatchHistory()
+    if Options.earlystop:
+        earlystopper = ks.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.01, patience=5, verbose=0, mode='auto')
+        trainCallbacks = [csv_logger, checkpointer, earlystopper, batchHistory]
+    else:
+        trainCallbacks = [csv_logger, checkpointer, batchHistory]
 
     history = model.Model.fit(x=train_seqs, y=train_targets,
                     batch_size=Options.BatchSize,
@@ -274,7 +279,7 @@ def TrainModel(Options, model, data, allOutDir):
                     verbose=1,
                     # steps_per_epoch=Options.BatchSize,
                     validation_data=(valid_seqs, valid_targets),
-                    callbacks=[csv_logger, checkpointer, earlystopper, batchHistory])
+                    callbacks=trainCallbacks)
 
     try:
         logging.info("Attempting to dump history pickle.")
