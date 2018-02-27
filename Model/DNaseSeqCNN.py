@@ -53,7 +53,7 @@ def OptionParsing():
     parser.add_option('-t', '--testmodel', dest='testmodel', default=False, action='store_true', help="Set flag to subset data to 0.05% of total for testing architecture and functions.")
     parser.add_option('--usealpha', dest="usealpha", default=False, action='store_true', help="Whether or not to use an alpha weighting value")
     parser.add_option('-w', '--alphaweight', dest='alphaweight', default=None, type=float, help="Weighted value for binary crossentropy, if specified a custom binary cross entropy equation is used.")
-    parser.add_option('-e', '--earlystopping', dest='earlystop', default=True, action='store_false', help="Turn off early stopping with this flag. Default is True.")
+    parser.add_option('-z', '--earlystopping', dest='earlystop', default=True, action='store_false', help="Turn off early stopping with this flag. Default is True.")
     (options, args) = parser.parse_args()
     if not options.ModelData:
         parser.error('ERROR: Must provide a *.h5 file with train, test, and validation data.')
