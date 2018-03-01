@@ -131,10 +131,10 @@ def GetDataSetValues(Options, allOutDir):
 
     # Print table
     header = "Sequences\tBasset\tBasset.No.Cancer\tAll.ENCODE.No.Cancer"
-    trainLine = "%s\t%s\t%s\t%s"("Train",basset.train_seqs.shape[0],bassetNoCancer.train_seqs.shape[0],AllENCODEnocancer.train_seqs.shape[0])
-    validLine = "%s\t%s\t%s\t%s"("Validate",basset.valid_seqs.shape[0],bassetNoCancer.valid_seqs.shape[0],AllENCODEnocancer.valid_seqs.shape[0])
-    testLine = "%s\t%s\t%s\t%s"("Test", basset.test_seqs.shape[0], bassetNoCancer.test_seqs.shape[0],AllENCODEnocancer.test_seqs.shape[0])
-    totalLine = "%s\t%s\t%s\t%s"("Total", trains[0]+valids[0]+tests[0], trains[1]+valids[1]+tests[1], trains[2]+valids[2]+tests[2])
+    trainLine = "%s\t%s\t%s\t%s"%("Train",basset.train_seqs.shape[0],bassetNoCancer.train_seqs.shape[0],AllENCODEnocancer.train_seqs.shape[0])
+    validLine = "%s\t%s\t%s\t%s"%("Validate",basset.valid_seqs.shape[0],bassetNoCancer.valid_seqs.shape[0],AllENCODEnocancer.valid_seqs.shape[0])
+    testLine = "%s\t%s\t%s\t%s"%("Test", basset.test_seqs.shape[0], bassetNoCancer.test_seqs.shape[0],AllENCODEnocancer.test_seqs.shape[0])
+    totalLine = "%s\t%s\t%s\t%s"%("Total", trains[0]+valids[0]+tests[0], trains[1]+valids[1]+tests[1], trains[2]+valids[2]+tests[2])
 
     with open(allOutDir+"/Sequence.Split.Summary.txt","w") as outFile:
         outFile.write('\n'.join([header, trainLine, validLine, testLine, totalLine]))
