@@ -139,9 +139,13 @@ def GetDataSetValues(Options, allOutDir):
     with open(allOutDir+"/Sequence.Split.Summary.txt","w") as outFile:
         outFile.write('\n'.join([header, trainLine, validLine, testLine, totalLine]))
 
+def GetAUCsOverlapping(Options, allOutDir):
 
-def GetAUCsOverlapping():
-    pass
+    lines = []
+    for dataset in [Options.basset, Options.bassetNoCancerData, Options.AllEncodeData]:
+        with open("%sModelEvalOutput/roc_curve_data.csv"%(dataset), 'r') as inFile:
+            rocLines = [line.rstrip('\n') for line in inFile.readlines()]
+        print(rocLines[0])
 
 def main():
     # Setup Primary Variables
@@ -155,11 +159,10 @@ def main():
     except Exception as e:
         print(e, file=sys.stdout)
 
-    # TODO Compare Dataset Numbers...
-    GetDataSetValues(Options, allOutDir)
+    # GetDataSetValues(Options, allOutDir)
 
     # TODO Compare AUCS for overlapping cell lines
-    GetAUCsOverlapping()
+    GetAUCsOverlapping(Options, allOutDir)
 
 if __name__=="__main__":
     main()
