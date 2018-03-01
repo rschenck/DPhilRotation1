@@ -142,7 +142,7 @@ def GetDataSetValues(Options, allOutDir):
 def GetAUCsOverlapping(Options, allOutDir):
 
     lines = []
-    for dataset in [Options.basset, Options.bassetNoCancerData, Options.AllEncodeData]:
+    for dataset in [Options.basset, Options.bassetNoCancer, Options.AllEncode]:
         with open("%sModelEvalOutput/roc_curve_data.csv"%(dataset), 'r') as inFile:
             rocLines = [line.rstrip('\n') for line in inFile.readlines()]
         print(rocLines[0])
