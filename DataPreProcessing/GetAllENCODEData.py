@@ -16,7 +16,8 @@ def ParseMetaDataTable(FilePath):
     ids = {}
     for exp in exps:
         dfSub = df.loc[df['Experiment accession'] == exp]
-        ids.update({exp:{'accessionName':list(dfSub['File accession']), 'files':list(dfSub["File download URL"]), 'replicates':list(dfSub["Biological replicate(s)"]), 'SampleType':list(set(list(dfSub['Biosample type'])))} })
+        ids.update({exp:{'accessionName':list(dfSub['File accession']), 'files':list(dfSub["File download URL"]), 'replicates':list(dfSub["Biological replicate(s)"]), 'SampleType':list(set(list(dfSub['Biosample type']))), 'BioTerm':list(set(list(dfSub['Biosample term name'])))} })
+    print(ids)
 
     try:
         os.mkdir("%s/Data/ENCODE_NewData"%(FilePath))
@@ -27,7 +28,7 @@ def ParseMetaDataTable(FilePath):
     with open(myFile, 'w') as outFile:
         for exp in ids:
             for i, val in enumerate(ids[exp]['accessionName']):
-                outLine = [val, ids[exp]['files'][i], exp, ';'.join(ids[exp]['accessionName']), ids[exp]['replicates'][i], ids[exp]['SampleType'][0] ]
+                outLine = [val, ids[exp]['files'][i], exp, ';'.join(ids[exp]['accessionName']), ids[exp]['replicates'][i], ids[exp]['SampleType'][0], ids[exp]['BioTerm'][0] ]
                 outFile.write('\t'.join(outLine)+'\n')
 
     return(myFile)
@@ -45,7 +46,7 @@ def main():
 
     ToDownloadFile = ParseMetaDataTable(FilePath)
     print(ToDownloadFile)
-    DownloadData(ToDownloadFile, FilePath)
+    # DownloadData(ToDownloadFile, FilePath)
 
 if __name__=="__main__":
     main()
