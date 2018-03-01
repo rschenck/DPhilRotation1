@@ -12,6 +12,11 @@ AllENCODE NoCancerDefault: /well/wedge/rschenck/DPhilRotation1/Model/AllENCODEno
 
 Only Basset Default and Basset No Cancer have completely overlapping cell line sets. Otherwise, the AllENCODE data only overlaps completely
 with the RoadmapEpigenomics dataset.
+
+NOTE: This will load ~33GB of data into RAM.
+
+...WHEN TO RUN...
+Run This after Model Evaluation has been completed (both rounds to get AUC and macro-micro averages)!!!!
 '''
 
 import os
@@ -24,10 +29,10 @@ try:
     import pickle
     from sklearn.metrics import roc_auc_score, roc_curve, auc
     import datetime
-    from scipy import interp
+    # from scipy import interp
 
-    import keras as ks
-    import tensorflow as tf
+    # import keras as ks
+    # import tensorflow as tf
     import numpy as np
     import h5py
 except Exception as e:
@@ -86,39 +91,54 @@ class Data:
         usrData.close()
 
 def GetDataSetValues(Options, allOutDir):
+    print("INFO: Loading Data.")
     basset = Data(Options.bassetData)
     bassetNoCancer = Data(Options.bassetNoCancerData)
     AllENCODEnocancer = Data(Options.AllEncodeData)
 
-    print("INFO: Printing Shapes of Data for Basset, BassetNoCancer, and AllENCODENoCancer in that order.")
-    print("INFO: Train Sequences...")
-    print(basset.train_seqs.shape)
-    print(bassetNoCancer.train_seqs.shape)
-    print(AllENCODEnocancer.train_seqs.shape)
-    print("INFO: Validation Sequences...")
-    print(basset.valid_seqs.shape)
-    print(bassetNoCancer.valid_seqs.shape)
-    print(AllENCODEnocancer.valid_seqs.shape)
-    print("INFO: Test Sequences...")
-    print(basset.test_seqs.shape)
-    print(bassetNoCancer.test_seqs.shape)
-    print(AllENCODEnocancer.test_seqs.shape)
-    print("INFO: Train Targets...")
-    print(basset.train_targets.shape)
-    print(bassetNoCancer.train_targets.shape)
-    print(AllENCODEnocancer.train_targets.shape)
-    print("INFO: Validation Targets...")
-    print(basset.valid_targets.shape)
-    print(bassetNoCancer.valid_targets.shape)
-    print(AllENCODEnocancer.valid_targets.shape)
-    print("INFO: Test Targets...")
-    print(basset.test_targets.shape)
-    print(bassetNoCancer.test_targets.shape)
-    print(AllENCODEnocancer.test_targets.shape)
-    print("INFO: Test Headers...")
-    print(basset.test_headers.shape)
-    print(bassetNoCancer.test_headers.shape)
-    print(AllENCODEnocancer.test_headers.shape)
+    # print("INFO: Printing Shapes of Data for Basset, BassetNoCancer, and AllENCODENoCancer in that order.")
+    # print("INFO: Train Sequences...")
+    # print(basset.train_seqs.shape)
+    # print(bassetNoCancer.train_seqs.shape)
+    # print(AllENCODEnocancer.train_seqs.shape)
+    # print("INFO: Validation Sequences...")
+    # print(basset.valid_seqs.shape)
+    # print(bassetNoCancer.valid_seqs.shape)
+    # print(AllENCODEnocancer.valid_seqs.shape)
+    # print("INFO: Test Sequences...")
+    # print(basset.test_seqs.shape)
+    # print(bassetNoCancer.test_seqs.shape)
+    # print(AllENCODEnocancer.test_seqs.shape)
+    # print("INFO: Train Targets...")
+    # print(basset.train_targets.shape)
+    # print(bassetNoCancer.train_targets.shape)
+    # print(AllENCODEnocancer.train_targets.shape)
+    # print("INFO: Validation Targets...")
+    # print(basset.valid_targets.shape)
+    # print(bassetNoCancer.valid_targets.shape)
+    # print(AllENCODEnocancer.valid_targets.shape)
+    # print("INFO: Test Targets...")
+    # print(basset.test_targets.shape)
+    # print(bassetNoCancer.test_targets.shape)
+    # print(AllENCODEnocancer.test_targets.shape)
+    # print("INFO: Test Headers...")
+    # print(basset.test_headers.shape)
+    # print(bassetNoCancer.test_headers.shape)
+    # print(AllENCODEnocancer.test_headers.shape)
+    trains = [basset.train_seqs.shape[0], bassetNoCancer.train_seqs.shape[0], AllENCODEnocancer.train_seqs.shape[0]]
+    valids = [basset.valid_seqs.shape[0],bassetNoCancer.valid_seqs.shape[0],AllENCODEnocancer.valid_seqs.shape[0]]
+    tests = [basset.test_seqs.shape[0], bassetNoCancer.test_seqs.shape[0],AllENCODEnocancer.test_seqs.shape[0]]
+
+    # Print table
+    header = "Sequences\tBasset\tBasset.No.Cancer\tAll.ENCODE.No.Cancer"
+    trainLine = "%s\t%s\t%s\t%s"("Train",basset.train_seqs.shape[0],bassetNoCancer.train_seqs.shape[0],AllENCODEnocancer.train_seqs.shape[0])
+    validLine = "%s\t%s\t%s\t%s"("Validate",basset.valid_seqs.shape[0],bassetNoCancer.valid_seqs.shape[0],AllENCODEnocancer.valid_seqs.shape[0])
+    testLine = "%s\t%s\t%s\t%s"("Test", basset.test_seqs.shape[0], bassetNoCancer.test_seqs.shape[0],AllENCODEnocancer.test_seqs.shape[0])
+    totalLine = "%s\t%s\t%s\t%s"("Total", trains[0]+valids[0]+tests[0], trains[1]+valids[1]+tests[1], trains[2]+valids[2]+tests[2])
+
+    with open(allOutDir+"/Sequence.Split.Summary.txt","w") as outFile:
+        outFile.write('\n'.join([header, trainLine, validLine, testLine, totalLine]))
+
 
 def GetAUCsOverlapping():
     pass
