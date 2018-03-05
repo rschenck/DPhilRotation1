@@ -215,3 +215,7 @@ vignettes/*.pdf
 /Model/AllENCODEnocancer*
 
 
+Model/ModelComparisons/*.csv
+Model/ModelComparisons/*.png
+Model/ModelComparisons/*.pdf
+
