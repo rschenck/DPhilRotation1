@@ -46,7 +46,7 @@ def main():
 
     ToDownloadFile = ParseMetaDataTable(FilePath)
     print(ToDownloadFile)
-    # DownloadData(ToDownloadFile, FilePath)
+    DownloadData(ToDownloadFile, FilePath)
 
 if __name__=="__main__":
     main()
